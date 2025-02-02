@@ -15,6 +15,37 @@ bool is_running = false;
 uint32_t* color_buffer = NULL;
 SDL_Texture* color_buffer_texture = NULL;
 
+uint32_t C_TEAL = 0x82f2fa;
+uint32_t C_BLACK = 0xFF000000;
+uint32_t C_GREY = 0xFF333333;
+uint32_t C_WHITE = 0xFFFFFFFF;
+uint32_t C_RED = 0xFFFF0000;
+
+
+void draw_grid(int cellSize, uint32_t color) {
+	// Draw vertical lines
+	for (int x = 0; x < window_width; x += cellSize) {
+		for (int y = 0; y < window_height; y++) {
+			color_buffer[(window_width * y) + x] = color;
+		}
+	}
+
+	// Draw horizontal lines
+	for (int y = 0; y < window_height; y += cellSize) {
+		for (int x = 0; x < window_width; x++) {
+			color_buffer[(window_width * y) + x] = color;
+		}
+	}
+}
+
+void draw_dot(int cellSize, uint32_t color) {
+	for (int x = 0; x < window_width; x += cellSize) {
+		for (int y = 0; y < window_height; y += cellSize) {
+			color_buffer[(window_width * y) + x] = color;
+		}
+	}
+}
+
 bool initialize_window(void) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		fprintf(stderr, "Error initializing SDL. \n");
@@ -117,9 +148,10 @@ void render(void) {
 	//SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	SDL_RenderClear(renderer);
 
+	draw_grid(10, C_GREY);
+	//draw_dot(10, C_TEAL);
 	render_color_buffer(); // Render the color buffer to the texture
-
-	clear_color_buffer(0xFFFFFF00); // Set each pixel to yellow color in buffer
+	clear_color_buffer(0xFF000000); // Set each pixel to yellow color in buffer
 
 	SDL_RenderPresent(renderer);
 }
