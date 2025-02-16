@@ -3,90 +3,25 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-// Window settings
-int window_width = 800;
-int window_height = 600;
+#include "display.h"
+#include "vector.h"
 
-SDL_Window* window = NULL;
-SDL_Renderer* renderer = NULL;
 bool is_running = false;
-
-// Color buffer is copied to texture for rendering
-uint32_t* color_buffer = NULL;
-SDL_Texture* color_buffer_texture = NULL;
 
 uint32_t C_TEAL = 0x82f2fa;
 uint32_t C_BLACK = 0xFF000000;
 uint32_t C_GREY = 0xFF333333;
 uint32_t C_WHITE = 0xFFFFFFFF;
 uint32_t C_RED = 0xFFFF0000;
+uint32_t C_PINK = 0xfc60fc;
+
+const int N_POINTS = 9 * 9 * 9;
+vec3 cube_points[N_POINTS];
+vec2 projected_points[N_POINTS];
 
 
-void draw_grid(int cellSize, uint32_t color) {
-	// Draw vertical lines
-	for (int x = 0; x < window_width; x += cellSize) {
-		for (int y = 0; y < window_height; y++) {
-			color_buffer[(window_width * y) + x] = color;
-		}
-	}
-
-	// Draw horizontal lines
-	for (int y = 0; y < window_height; y += cellSize) {
-		for (int x = 0; x < window_width; x++) {
-			color_buffer[(window_width * y) + x] = color;
-		}
-	}
-}
-
-void draw_dot(int cellSize, uint32_t color) {
-	for (int x = 0; x < window_width; x += cellSize) {
-		for (int y = 0; y < window_height; y += cellSize) {
-			color_buffer[(window_width * y) + x] = color;
-		}
-	}
-}
-
-bool initialize_window(void) {
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-		fprintf(stderr, "Error initializing SDL. \n");
-		return false;
-	}
-
-	// Query SDL to get fullscreen max width and height
-	SDL_DisplayMode display_mode;
-	SDL_GetCurrentDisplayMode(0, &display_mode);
-	window_width = display_mode.w;
-	window_height = display_mode.h;
-
-
-	// Create SDL window
-	window = SDL_CreateWindow(NULL, 
-		SDL_WINDOWPOS_CENTERED, 
-		SDL_WINDOWPOS_CENTERED, 
-		window_width, 
-		window_height, 
-		SDL_WINDOW_BORDERLESS);
-
-	if (!window) {
-		fprintf(stderr, "Error creating SDL window. \n");
-		return false;
-	}
-	
-	// TODO: Create SDL renderer
-	renderer = SDL_CreateRenderer(window, -1, 0);
-	if (!renderer) {
-		fprintf(stderr, "Error creating renderer. \n");
-		return false;
-	}
-
-	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-
-	return true;
-}
-
-void create_color_buffer_32(uint32_t** bufferP, int size) {
-	*bufferP = (uint32_t*)malloc(sizeof uint32_t * size);
-}
+int objX = 200;
+int objY = 200;
 
 void setup(void) {
 	// Allocate the color buffer in memory
@@ -103,6 +38,19 @@ void setup(void) {
 		window_width,
 		window_height
 	);
+
+	// Load cube points
+	// From -1 to 1 (length 2)
+
+	int point_count = 0;
+	for (float x = -1; x <= 1; x += 0.25) {
+		for (float y = -1; y <= 1; y += 0.25) {
+			for (float z = -1; z <= 1; z += 0.25) {
+				vec3 new_point = { x, y, z };
+				cube_points[point_count++] = new_point;
+			}
+		}
+	}
 }
 
 void process_input(void) {
@@ -117,54 +65,54 @@ void process_input(void) {
 		if (event.key.keysym.sym == SDLK_ESCAPE) {
 			is_running = false;
 		}
+		if (event.key.keysym.sym == SDLK_RIGHT) {
+			objX += 2;
+		}
+		if (event.key.keysym.sym == SDLK_LEFT) {
+			objX -= 2;
+		}
+		if (event.key.keysym.sym == SDLK_DOWN) {
+			objY += 2;
+		}
+		if (event.key.keysym.sym == SDLK_UP) {
+			objY -= 2;
+		}
 		break;
 	}
 }
 
 void update() {
-	// TODO:
-}
+	cube_rotation.y += 0.01;
+	cube_rotation.x += 0.01;
+	cube_rotation.z += 0.01;
 
-void clear_color_buffer(uint32_t color) {
-	// TODO: pass size of color buffer and buffer and set with out nested loop?
-	for (int y = 0; y < window_height; y++) {
-		for (int x = 0; x < window_width; x++) {
-			color_buffer[(window_width * y) + x] = color;
-		}
+	for (int i = 0; i < N_POINTS; i++) {
+		vec3 point = cube_points[i];
+
+		// Apply rotations
+		vec3 transformedP = vec3_rotate_y(point, cube_rotation.y);
+		transformedP = vec3_rotate_x(transformedP, cube_rotation.x);
+		transformedP = vec3_rotate_z(transformedP, cube_rotation.z);
+
+		// Translate the points away from the camera
+		transformedP.z -= camera.z;
+
+		vec2 projected = project_point(transformedP);
+		projected_points[i] = projected;
 	}
 }
 
-// Render on the back buffer, render buffer to texture
-void render_color_buffer(void) {
-	SDL_UpdateTexture(
-		color_buffer_texture,
-		NULL, 
-		color_buffer,
-		(int)window_width * sizeof uint32_t);
-	SDL_RenderCopy(renderer, color_buffer_texture, NULL, NULL);
-}
-
 void render(void) {
-	//SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-	SDL_RenderClear(renderer);
-
-	draw_grid(10, C_GREY);
-	//draw_dot(10, C_TEAL);
+	draw_grid(color_buffer, 10, C_GREY);
+	//draw_rect(color_buffer, objX, objY, 300, 200, C_TEAL);
+	for (int i = 0; i < N_POINTS - 1; i++) {
+		draw_rect(color_buffer, projected_points[i].x + (window_width / 2), projected_points[i].y + (window_height / 2), 4, 4, C_TEAL);
+	}
+	
 	render_color_buffer(); // Render the color buffer to the texture
 	clear_color_buffer(0xFF000000); // Set each pixel to yellow color in buffer
 
 	SDL_RenderPresent(renderer);
-}
-
-void setBufferPixel(int row, int col, uint32_t color) {
-	color_buffer[(window_width * row) + col] = color;
-}
-
-void cleanup(void) {
-	free(color_buffer);
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
 }
 
 int main(int argc, char* args[]) {
@@ -178,7 +126,7 @@ int main(int argc, char* args[]) {
 		render();
 	}
 
-	cleanup();
+	destroy_window();
 
 	return 0;
 }
