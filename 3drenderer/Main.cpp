@@ -2,9 +2,9 @@
 #include <SDL.h>
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "display.h"
 #include "vector.h"
+#include "mesh.h"
 
 bool is_running = false;
 
@@ -15,13 +15,13 @@ uint32_t C_WHITE = 0xFFFFFFFF;
 uint32_t C_RED = 0xFFFF0000;
 uint32_t C_PINK = 0xfc60fc;
 
-const int N_POINTS = 9 * 9 * 9;
-vec3 cube_points[N_POINTS];
-vec2 projected_points[N_POINTS];
-
+int previous_frame_time= 0;
 
 int objX = 200;
 int objY = 200;
+
+triangle triangles_to_render[N_MESH_FACES];
+
 
 void setup(void) {
 	// Allocate the color buffer in memory
@@ -38,19 +38,6 @@ void setup(void) {
 		window_width,
 		window_height
 	);
-
-	// Load cube points
-	// From -1 to 1 (length 2)
-
-	int point_count = 0;
-	for (float x = -1; x <= 1; x += 0.25) {
-		for (float y = -1; y <= 1; y += 0.25) {
-			for (float z = -1; z <= 1; z += 0.25) {
-				vec3 new_point = { x, y, z };
-				cube_points[point_count++] = new_point;
-			}
-		}
-	}
 }
 
 void process_input(void) {
@@ -82,33 +69,72 @@ void process_input(void) {
 }
 
 void update() {
-	cube_rotation.y += 0.01;
-	cube_rotation.x += 0.01;
-	cube_rotation.z += 0.01;
+	int time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
+	//while (!SDL_TICKS_PASSED(SDL_GetTicks(), previous_frame_time + FRAME_TARGET_TIME));
+	if (time_to_wait > 0 && time_to_wait <= FRAME_TARGET_TIME) {
+		SDL_Delay(time_to_wait);
+	}
 
-	for (int i = 0; i < N_POINTS; i++) {
-		vec3 point = cube_points[i];
+	cube_rotation.y += 0.00;
+	cube_rotation.x += 0.00;
+	cube_rotation.z += 0.00;
 
-		// Apply rotations
-		vec3 transformedP = vec3_rotate_y(point, cube_rotation.y);
-		transformedP = vec3_rotate_x(transformedP, cube_rotation.x);
-		transformedP = vec3_rotate_z(transformedP, cube_rotation.z);
+	for (int i = 0; i < N_MESH_FACES; i++) {
+		face mesh_face = mesh_faces[i];
 
-		// Translate the points away from the camera
-		transformedP.z -= camera.z;
+		vec3 face_vertices[3];
 
-		vec2 projected = project_point(transformedP);
-		projected_points[i] = projected;
+		face_vertices[0] = mesh_vertices[mesh_face.a - 1];
+		face_vertices[1] = mesh_vertices[mesh_face.b - 1];
+		face_vertices[2] = mesh_vertices[mesh_face.c - 1];
+
+		triangle projected_triangle;
+
+		for (int j = 0; j < 3; j++) {
+			vec3 transformed_vertex = face_vertices[j];
+			transformed_vertex = vec3_rotate_y(transformed_vertex, cube_rotation.y);
+			transformed_vertex = vec3_rotate_x(transformed_vertex, cube_rotation.x);
+			transformed_vertex = vec3_rotate_z(transformed_vertex, cube_rotation.z);
+
+			transformed_vertex.z -= camera.z;
+
+			vec2 projected_point = project_point(transformed_vertex);
+			
+			// Scale and translate the projected point
+			projected_point.x += window_width / 2;
+			projected_point.y += window_height / 2;
+
+			projected_triangle.points[j] = projected_point;
+		}
+
+		triangles_to_render[i] = projected_triangle;
+
 	}
 }
 
 void render(void) {
-	draw_grid(color_buffer, 10, C_GREY);
+	// draw_grid(color_buffer, 10, C_GREY);
 	//draw_rect(color_buffer, objX, objY, 300, 200, C_TEAL);
+	/*
 	for (int i = 0; i < N_POINTS - 1; i++) {
 		draw_rect(color_buffer, projected_points[i].x + (window_width / 2), projected_points[i].y + (window_height / 2), 4, 4, C_TEAL);
 	}
-	
+	*/
+
+	for (int i = 0; i < N_MESH_FACES; i++) {
+		triangle tri = triangles_to_render[i];
+
+		draw_triangle(color_buffer, tri, C_TEAL);
+
+		//vec2 point1 = tri.points[0];
+		//vec2 point2 = tri.points[1];
+		//vec2 point3 = tri.points[2];
+
+		//draw_rect(color_buffer, point1.x, point1.y, 4, 4, C_TEAL);
+		//draw_rect(color_buffer, point2.x, point2.y, 4, 4, C_TEAL);
+		//draw_rect(color_buffer, point3.x, point3.y, 4, 4, C_TEAL);
+	}
+
 	render_color_buffer(); // Render the color buffer to the texture
 	clear_color_buffer(0xFF000000); // Set each pixel to yellow color in buffer
 

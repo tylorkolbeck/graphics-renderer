@@ -1,4 +1,5 @@
 #include "display.h"
+#include "triangles.h"
 
 extern SDL_Window* window = NULL;
 extern SDL_Renderer* renderer = NULL;
@@ -20,8 +21,9 @@ bool initialize_window(void) {
 	// Query SDL to get fullscreen max width and height
 	SDL_DisplayMode display_mode;
 	SDL_GetCurrentDisplayMode(0, &display_mode);
-	window_width = display_mode.w;
-	window_height = display_mode.h;
+	//window_width = display_mode.w;
+	//window_height = display_mode.h;
+
 
 
 	// Create SDL window
@@ -133,4 +135,36 @@ vec2 project_point(vec3 vert) {
 	};
 
 	return projected;
+}
+
+void draw_line(uint32_t* buffer_p, vec2 a, vec2 b, uint32_t color) {
+	int dx = b.x - a.x;
+	int dy = b.y - a.y;
+
+	int side_length = abs(dx) >= abs(dy) ? abs(dx) : abs(dy);
+
+	float x_inc = dx / (float)side_length;
+	float y_inc = dy / (float)side_length;
+
+	float current_x = dx;
+	float current_y = dy;
+
+	for (int i = 0; i < side_length; i++) {
+		draw_pixel(buffer_p, round(current_x), round(current_y), color);
+		current_x += x_inc;
+		current_y += y_inc;
+	}
+}
+
+void draw_triangle(uint32_t* buffer_p, triangle tri, uint32_t color)
+{
+	vec2 p1 = tri.points[0];
+	vec2 p2 = tri.points[1];
+	vec2 p3 = tri.points[2];
+
+	draw_line(buffer_p, p1, p2, color);
+	draw_line(buffer_p, p2, p3, color);
+	draw_line(buffer_p, p3, p1, color);
+
+
 }
