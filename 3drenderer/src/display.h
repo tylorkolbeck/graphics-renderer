@@ -20,8 +20,8 @@ extern int window_width;
 extern int window_height;
 extern float fov_factor;
 extern vec3 camera;
-extern vec3 cube_rotation;
 extern bool is_perspective;
+extern bool show_grid;
 
 
 

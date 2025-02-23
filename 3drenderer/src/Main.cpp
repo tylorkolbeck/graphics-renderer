@@ -40,7 +40,7 @@ void setup(void)
 		window_width,
 		window_height);
 
-		triangles_to_render.resize(mesh_faces.size());
+	load_cube_mesh();
 }
 
 void process_input(void)
@@ -86,6 +86,9 @@ void process_input(void)
 		{
 			camera.z -= 0.1;
 		}
+		if (event.key.keysym.sym == SDLK_g) {
+			show_grid = !show_grid;
+		}
 		break;
 	}
 }
@@ -99,31 +102,33 @@ void update()
 	}
 
 	// Increment the rotation of the cube
-	cube_rotation.y += 0.01;
-	cube_rotation.x += 0.01;
-	cube_rotation.z += 0.01;
+	mesh.rotation.y += 0.01;
+	mesh.rotation.x += 0.01;
+	mesh.rotation.z += 0.01;
 
+	int num_faces = mesh.faces.size();
+
+	// Reset faces array
+	triangles_to_render.resize(num_faces);
 	triangles_to_render.clear();
 
-	for (int i = 0; i < mesh_faces.size(); i++)
+	for (int i = 0; i < num_faces; i++)
 	{
-		face mesh_face = mesh_faces[i];
-
+		face mesh_face = mesh.faces[i];
 		vec3 face_vertices[3];
 
-		face_vertices[0] = mesh_vertices[mesh_face.a - 1];
-		face_vertices[1] = mesh_vertices[mesh_face.b - 1];
-		face_vertices[2] = mesh_vertices[mesh_face.c - 1];
+		face_vertices[0] = mesh.vertices[mesh_face.a - 1];
+		face_vertices[1] = mesh.vertices[mesh_face.b - 1];
+		face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
 		triangle projected_triangle;
-
 		for (int j = 0; j < 3; j++)
 		{
 			// Apply transformation
 			vec3 transformed_vertex = face_vertices[j];
-			transformed_vertex = vec3_rotate_y(transformed_vertex, cube_rotation.y);
-			transformed_vertex = vec3_rotate_x(transformed_vertex, cube_rotation.x);
-			transformed_vertex = vec3_rotate_z(transformed_vertex, cube_rotation.z);
+			transformed_vertex = vec3_rotate_y(transformed_vertex, mesh.rotation.y);
+			transformed_vertex = vec3_rotate_x(transformed_vertex, mesh.rotation.x);
+			transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
 			transformed_vertex.z -= camera.z;
 
@@ -143,19 +148,13 @@ void update()
 
 void render(void)
 {
-	draw_grid(color_buffer, 10, C_GREY);
-	// draw_rect(color_buffer, objX, objY, 300, 200, C_TEAL);
-	/*
-	for (int i = 0; i < N_POINTS - 1; i++) {
-		draw_rect(color_buffer, projected_points[i].x + (window_width / 2), projected_points[i].y + (window_height / 2), 4, 4, C_TEAL);
-	}
-	*/
+	// Draw grid
+	if (show_grid)
+		draw_grid(color_buffer, 10, C_GREY);
 
 	for (int i = 0; i < mesh_faces.size(); i++)
 	{
 		triangle tri = triangles_to_render[i];
-
-		// draw_triangle(color_buffer, point1, point2, C_PINK);
 		draw_triangle(color_buffer, tri, C_TEAL);
 
 		vec2 point1 = tri.points[0];
@@ -173,6 +172,11 @@ void render(void)
 	SDL_RenderPresent(renderer);
 }
 
+void free_resources(void)
+{
+	free(color_buffer);
+}
+
 int main(int argc, char *args[])
 {
 	is_running = initialize_window();
@@ -187,6 +191,7 @@ int main(int argc, char *args[])
 	}
 
 	destroy_window();
+	free_resources();
 
 	return 0;
 }

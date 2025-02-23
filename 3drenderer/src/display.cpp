@@ -11,9 +11,10 @@ extern int window_height = 600;
 float fov_factor = 640;
 
 bool is_perspective = true;
+bool show_grid = true;
 
 vec3 camera = {0, 0, -5};
-vec3 cube_rotation = {0, 0, 0};
+
 
 bool initialize_window(void)
 {
