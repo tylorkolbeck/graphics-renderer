@@ -19,7 +19,7 @@ extern SDL_Texture* color_buffer_texture;
 extern int window_width;
 extern int window_height;
 extern float fov_factor;
-extern vec3 camera;
+extern vec3_t camera;
 extern bool is_perspective;
 extern bool show_grid;
 
@@ -36,8 +36,8 @@ void clear_color_buffer(uint32_t color);
 void setBufferPixel(int row, int col, uint32_t color);
 void render_color_buffer(void);
 int loc_1d(int x, int y);
-vec2 project(vec3 vert);
-void draw_line(uint32_t* buffer_p, vec2 a, vec2 b, uint32_t color);
+vec2_t project(vec3_t vert);
+void draw_line(uint32_t* buffer_p, vec2_t a, vec2_t b, uint32_t color);
 void draw_triangle(uint32_t* buffer_p, triangle tri, uint32_t color);
 
 

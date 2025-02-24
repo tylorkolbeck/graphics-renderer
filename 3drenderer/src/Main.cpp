@@ -3,9 +3,13 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <iostream>
 #include "display.h"
 #include "vector.h"
 #include "mesh.h"
+#include "mesh_loader.h"
+
+#include <filesystem>
 
 bool is_running = false;
 
@@ -23,8 +27,18 @@ int objY = 200;
 
 std::vector<triangle> triangles_to_render = {};
 
+mesh_t mesh = {};
+
+void load_meshes(mesh_t& mesh) 
+{
+	std::string file_path = "assets/f22.obj";
+	parse_obj_file(file_path, mesh);
+
+}
+
 void setup(void)
 {
+
 	// Allocate the color buffer in memory
 	create_color_buffer_32(&color_buffer, window_width * window_height);
 	if (!color_buffer)
@@ -40,7 +54,10 @@ void setup(void)
 		window_width,
 		window_height);
 
-	load_cube_mesh();
+	load_meshes(mesh);
+
+	// Flip model
+	mesh.rotation.x = 3.14; 
 }
 
 void process_input(void)
@@ -102,9 +119,9 @@ void update()
 	}
 
 	// Increment the rotation of the cube
-	mesh.rotation.y += 0.01;
+	mesh.rotation.y += 0.00;
 	mesh.rotation.x += 0.01;
-	mesh.rotation.z += 0.01;
+	mesh.rotation.z += 0.00;
 
 	int num_faces = mesh.faces.size();
 
@@ -115,7 +132,7 @@ void update()
 	for (int i = 0; i < num_faces; i++)
 	{
 		face mesh_face = mesh.faces[i];
-		vec3 face_vertices[3];
+		vec3_t face_vertices[3];
 
 		face_vertices[0] = mesh.vertices[mesh_face.a - 1];
 		face_vertices[1] = mesh.vertices[mesh_face.b - 1];
@@ -125,7 +142,7 @@ void update()
 		for (int j = 0; j < 3; j++)
 		{
 			// Apply transformation
-			vec3 transformed_vertex = face_vertices[j];
+			vec3_t transformed_vertex = face_vertices[j];
 			transformed_vertex = vec3_rotate_y(transformed_vertex, mesh.rotation.y);
 			transformed_vertex = vec3_rotate_x(transformed_vertex, mesh.rotation.x);
 			transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
@@ -133,7 +150,7 @@ void update()
 			transformed_vertex.z -= camera.z;
 
 			// Apply projection
-			vec2 projected_point = project(transformed_vertex);
+			vec2_t projected_point = project(transformed_vertex);
 
 			// Scale and translate the projected point
 			projected_point.x += window_width / 2;
@@ -152,18 +169,18 @@ void render(void)
 	if (show_grid)
 		draw_grid(color_buffer, 10, C_GREY);
 
-	for (int i = 0; i < mesh_faces.size(); i++)
+	for (int i = 0; i < mesh.faces.size(); i++)
 	{
 		triangle tri = triangles_to_render[i];
 		draw_triangle(color_buffer, tri, C_TEAL);
 
-		vec2 point1 = tri.points[0];
-		vec2 point2 = tri.points[1];
-		vec2 point3 = tri.points[2];
+		vec2_t point1 = tri.points[0];
+		vec2_t point2 = tri.points[1];
+		vec2_t point3 = tri.points[2];
 
-		draw_rect(color_buffer, point1.x, point1.y, 4, 4, C_TEAL);
-		draw_rect(color_buffer, point2.x, point2.y, 4, 4, C_TEAL);
-		draw_rect(color_buffer, point3.x, point3.y, 4, 4, C_TEAL);
+		// draw_rect(color_buffer, point1.x, point1.y, 4, 4, C_TEAL);
+		// draw_rect(color_buffer, point2.x, point2.y, 4, 4, C_TEAL);
+		// draw_rect(color_buffer, point3.x, point3.y, 4, 4, C_TEAL);
 	}
 
 	render_color_buffer();			// Render the color buffer to the texture
@@ -174,7 +191,7 @@ void render(void)
 
 void free_resources(void)
 {
-	free(color_buffer);
+	// free(color_buffer);
 }
 
 int main(int argc, char *args[])

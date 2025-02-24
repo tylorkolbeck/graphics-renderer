@@ -3,8 +3,8 @@
 #include "vector.h"
 
 typedef struct {
-	vec3 location;
-	vec3 rotation;
+	vec3_t location;
+	vec3_t rotation;
 	float fovAngle;
 } camera;
 

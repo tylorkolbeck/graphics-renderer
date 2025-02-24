@@ -11,9 +11,9 @@ extern int window_height = 600;
 float fov_factor = 640;
 
 bool is_perspective = true;
-bool show_grid = true;
+bool show_grid = false;
 
-vec3 camera = {0, 0, -5};
+vec3_t camera = {0, 0, -2};
 
 
 bool initialize_window(void)
@@ -155,7 +155,7 @@ int loc_1d(int x, int y)
 	return (window_width * y) + x;
 }
 
-vec2 project(vec3 point)
+vec2_t project(vec3_t point)
 {
 	if (is_perspective)
 	{
@@ -169,7 +169,7 @@ vec2 project(vec3 point)
 		(point.y * fov_factor)};
 }
 
-void draw_line(uint32_t *buffer_p, vec2 a, vec2 b, uint32_t color)
+void draw_line(uint32_t *buffer_p, vec2_t a, vec2_t b, uint32_t color)
 {
 	int dx = b.x - a.x;
 	int dy = b.y - a.y;
@@ -192,9 +192,9 @@ void draw_line(uint32_t *buffer_p, vec2 a, vec2 b, uint32_t color)
 
 void draw_triangle(uint32_t *buffer_p, triangle tri, uint32_t color)
 {
-	vec2 p1 = tri.points[0];
-	vec2 p2 = tri.points[1];
-	vec2 p3 = tri.points[2];
+	vec2_t p1 = tri.points[0];
+	vec2_t p2 = tri.points[1];
+	vec2_t p3 = tri.points[2];
 
 	draw_line(buffer_p, p1, p2, color);
 	draw_line(buffer_p, p2, p3, color);

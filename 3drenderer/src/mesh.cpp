@@ -1,9 +1,9 @@
 #include <vector>
 #include "mesh.h"
 
-mesh_t mesh;	
+// mesh_t mesh;	
 
-std::vector<vec3> mesh_vertices = {
+std::vector<vec3_t> mesh_vertices = {
 	{-1, -1, -1},
 	{-1, 1, -1},
 	{1, 1, -1},
@@ -33,7 +33,7 @@ std::vector<face> mesh_faces = {
 	{6, 8, 1},
 	{6, 1, 4}};
 
-std::vector<vec3> cube_mesh_vertices = {
+std::vector<vec3_t> cube_mesh_vertices = {
 	{-1, -1, -1},
 	{-1, 1, -1},
 	{1, 1, -1},
@@ -63,15 +63,15 @@ std::vector<face> cube_mesh_faces = {
 	{6, 8, 1},
 	{6, 1, 4}};
 
-void load_cube_mesh(void)
-{
-	for (int i = 0; i < cube_mesh_vertices.size(); i++)
-	{
-		mesh.vertices.push_back(cube_mesh_vertices[i]);
-	}
+// void load_cube_mesh(void)
+// {
+// 	for (int i = 0; i < cube_mesh_vertices.size(); i++)
+// 	{
+// 		mesh.vertices.push_back(cube_mesh_vertices[i]);
+// 	}
 
-	for (int i = 0; i < cube_mesh_faces.size(); i++)
-	{
-		mesh.faces.push_back(cube_mesh_faces[i]);
-	}
-}
+// 	for (int i = 0; i < cube_mesh_faces.size(); i++)
+// 	{
+// 		mesh.faces.push_back(cube_mesh_faces[i]);
+// 	}
+// }
