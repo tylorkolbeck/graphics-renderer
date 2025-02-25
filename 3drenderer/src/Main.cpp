@@ -22,6 +22,8 @@ uint32_t C_PINK = 0xfc60fc;
 
 int previous_frame_time = 0;
 
+bool ready_to_process_input = false;
+
 int objX = 200;
 int objY = 200;
 
@@ -29,11 +31,10 @@ std::vector<triangle> triangles_to_render = {};
 
 mesh_t mesh = {};
 
-void load_meshes(mesh_t& mesh) 
+void load_meshes(mesh_t &mesh)
 {
 	std::string file_path = "assets/f22.obj";
 	parse_obj_file(file_path, mesh);
-
 }
 
 void setup(void)
@@ -57,13 +58,15 @@ void setup(void)
 	load_meshes(mesh);
 
 	// Flip model
-	mesh.rotation.x = 3.14; 
+	mesh.rotation.x = 3.14 / 2;
+
 }
 
 void process_input(void)
 {
 	SDL_Event event;
 	SDL_PollEvent(&event);
+	ready_to_process_input = true;
 
 	switch (event.type)
 	{
@@ -103,8 +106,13 @@ void process_input(void)
 		{
 			camera.z -= 0.1;
 		}
-		if (event.key.keysym.sym == SDLK_g) {
+		if (event.key.keysym.sym == SDLK_g)
+		{
 			show_grid = !show_grid;
+		}
+		if (event.key.keysym.sym == SDLK_q)
+		{
+			cull_faces = !cull_faces;
 		}
 		break;
 	}
@@ -129,6 +137,7 @@ void update()
 	triangles_to_render.resize(num_faces);
 	triangles_to_render.clear();
 
+	// Loop all the triangle faces of the mesh
 	for (int i = 0; i < num_faces; i++)
 	{
 		face mesh_face = mesh.faces[i];
@@ -139,20 +148,58 @@ void update()
 		face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
 		triangle projected_triangle;
+
+		vec3_t transformed_vertices[3];
+		// Loop all three vertices of this current face and apply transformations
 		for (int j = 0; j < 3; j++)
 		{
-			// Apply transformation
+			// Apply transformation to put in correct position in the world
 			vec3_t transformed_vertex = face_vertices[j];
 			transformed_vertex = vec3_rotate_y(transformed_vertex, mesh.rotation.y);
 			transformed_vertex = vec3_rotate_x(transformed_vertex, mesh.rotation.x);
 			transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
+			// Translate the camera away from the camera
 			transformed_vertex.z -= camera.z;
 
-			// Apply projection
-			vec2_t projected_point = project(transformed_vertex);
+			// Save transformed vertext in the array of transformed vertices
+			transformed_vertices[j] = transformed_vertex;
+		}
 
-			// Scale and translate the projected point
+		// Check backface culling
+		vec3_t vector_a = transformed_vertices[0]; /* 	A	*/
+		vec3_t vector_b = transformed_vertices[1]; /*  / \  */
+		vec3_t vector_c = transformed_vertices[2]; /* C___B */
+
+		// 1. Find vectors B-A and C-A
+		vec3_t vector_ab = vec3_sub(vector_b, vector_a);
+		vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+		vec3_normalize(&vector_ab);
+		vec3_normalize(&vector_ac);
+
+		// 2. Compute face normal using cross product of ab and ac - Order matters based on winding direction
+		vec3_t normal = vec3_cross(vector_ab, vector_ac);
+		vec3_normalize(&normal);
+		
+		// 3. Find the camera ray vector by subtracting the camera position from point A
+		vec3_t camera_ray = vec3_sub({camera.x, camera.y, camera.z}, vector_a);
+		// 4. Take the dot product between the normal N and the camera ray
+		float dot_prod = vec3_dot(normal, camera_ray);
+		// 5. If this dot product is less than zero, then do not display the face
+
+		// If dot product is less than 0 then do not render
+		if (dot_prod < 0 && cull_faces)
+		{
+			continue;
+		}
+
+		// Loop all three transformed vertices to perform projection
+		for (int j = 0; j < 3; j++)
+		{
+			// Apply projection
+			vec2_t projected_point = project(transformed_vertices[j]);
+
+			// Scale and translate the projected point to the middle of the screen
 			projected_point.x += window_width / 2;
 			projected_point.y += window_height / 2;
 
@@ -165,6 +212,10 @@ void update()
 
 void render(void)
 {
+	if (!ready_to_process_input)
+	{
+		draw_rect(color_buffer, 10, 10, 50, 50, C_RED);
+	}
 	// Draw grid
 	if (show_grid)
 		draw_grid(color_buffer, 10, C_GREY);
@@ -174,9 +225,9 @@ void render(void)
 		triangle tri = triangles_to_render[i];
 		draw_triangle(color_buffer, tri, C_TEAL);
 
-		vec2_t point1 = tri.points[0];
-		vec2_t point2 = tri.points[1];
-		vec2_t point3 = tri.points[2];
+		// vec2_t point1 = tri.points[0];
+		// vec2_t point2 = tri.points[1];
+		// vec2_t point3 = tri.points[2];
 
 		// draw_rect(color_buffer, point1.x, point1.y, 4, 4, C_TEAL);
 		// draw_rect(color_buffer, point2.x, point2.y, 4, 4, C_TEAL);

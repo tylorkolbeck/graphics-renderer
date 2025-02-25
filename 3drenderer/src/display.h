@@ -22,6 +22,7 @@ extern float fov_factor;
 extern vec3_t camera;
 extern bool is_perspective;
 extern bool show_grid;
+extern bool cull_faces;
 
 
 

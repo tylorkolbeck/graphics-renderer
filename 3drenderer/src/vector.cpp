@@ -36,7 +36,7 @@ float vec2_length(vec2_t v)
 	return sqrt(v.x * v.x + v.y * v.y);
 }
 
-float vec3_length(vec3_t v)
+float vec3_mag(vec3_t v)
 {
 	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
@@ -112,8 +112,7 @@ vec3_t vec3_cross(vec3_t a, vec3_t b)
 	return {
 		a.y * b.z - a.z * b.y,
 		a.z * b.x - a.x * b.z,
-		a.x * b.y - a.y * b.x
-	};
+		a.x * b.y - a.y * b.x};
 }
 
 float vec2_dot(vec2_t a, vec2_t b)
@@ -124,4 +123,37 @@ float vec2_dot(vec2_t a, vec2_t b)
 float vec3_dot(vec3_t a, vec3_t b)
 {
 	return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
+}
+
+void vec3_normalize(vec3_t *v)
+{
+	float magnitude = sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
+
+	if (magnitude == 0)
+	{
+		v->x = 0;
+		v->y = 0;
+		v->z = 0;
+	}
+	else
+	{
+		v->x /= magnitude;
+		v->y /= magnitude;
+		v->z /= magnitude;
+	}
+}
+
+void vec2_normalize(vec2_t *v)
+{
+	float magnitude = sqrt(v->x * v->x + v->y * v->y);
+	if (magnitude == 0)
+	{
+		v->x = 0;
+		v->y = 0;
+	}
+	else
+	{
+		v->x /= magnitude;
+		v->y /= magnitude;
+	}
 }

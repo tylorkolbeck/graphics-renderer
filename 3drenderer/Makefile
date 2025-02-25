@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -std=c++11 -g
+CXXFLAGS = -Wall -std=c++17 -g
 LDFLAGS = -lSDL2
 TARGET = 3drenderer
 

@@ -12,9 +12,9 @@ float fov_factor = 640;
 
 bool is_perspective = true;
 bool show_grid = false;
+bool cull_faces = true;
 
-vec3_t camera = {0, 0, -2};
-
+vec3_t camera = {0, 0, -5};
 
 bool initialize_window(void)
 {

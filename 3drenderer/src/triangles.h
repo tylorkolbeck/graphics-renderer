@@ -6,6 +6,7 @@ typedef struct {
 	int a;
 	int b;
 	int c;
+	vec3_t normal;
 } face;
 
 typedef struct {
