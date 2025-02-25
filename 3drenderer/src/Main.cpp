@@ -8,17 +8,11 @@
 #include "vector.h"
 #include "mesh.h"
 #include "mesh_loader.h"
+#include "color.h"
 
 #include <filesystem>
 
 bool is_running = false;
-
-uint32_t C_TEAL = 0x82f2fa;
-uint32_t C_BLACK = 0xFF000000;
-uint32_t C_GREY = 0x2B2B2B;
-uint32_t C_WHITE = 0xFFFFFFFF;
-uint32_t C_RED = 0xFFFF0000;
-uint32_t C_PINK = 0xfc60fc;
 
 int previous_frame_time = 0;
 
@@ -39,7 +33,8 @@ void load_meshes(mesh_t &mesh)
 
 void setup(void)
 {
-
+	render_method = RENDER_WIRE;
+	cull_method = CULL_BACKFACE;
 	// Allocate the color buffer in memory
 	create_color_buffer_32(&color_buffer, window_width * window_height);
 	if (!color_buffer)
@@ -55,11 +50,11 @@ void setup(void)
 		window_width,
 		window_height);
 
-	load_meshes(mesh);
+	// load_meshes(mesh);
+	load_cube_mesh(mesh);
 
 	// Flip model
 	mesh.rotation.x = 3.14 / 2;
-
 }
 
 void process_input(void)
@@ -75,45 +70,25 @@ void process_input(void)
 		break;
 	case SDL_KEYDOWN:
 		if (event.key.keysym.sym == SDLK_ESCAPE)
-		{
 			is_running = false;
-		}
-		if (event.key.keysym.sym == SDLK_RIGHT)
-		{
-			objX += 2;
-		}
-		if (event.key.keysym.sym == SDLK_LEFT)
-		{
-			objX -= 2;
-		}
-		if (event.key.keysym.sym == SDLK_DOWN)
-		{
-			objY += 2;
-		}
-		if (event.key.keysym.sym == SDLK_UP)
-		{
-			objY -= 2;
-		}
-		if (event.key.keysym.sym == SDLK_p)
-		{
-			is_perspective = !is_perspective;
-		}
+		if (event.key.keysym.sym == SDLK_1)
+			render_method = RENDER_WIRE_VERTEX;
+		if (event.key.keysym.sym == SDLK_2)
+			render_method = RENDER_WIRE;
+		if (event.key.keysym.sym == SDLK_3)
+			render_method = RENDER_FILL_TRIANGLE;
+		if (event.key.keysym.sym == SDLK_4)
+			render_method = RENDER_FILL_TRIANGLE_WIRE;
+		if (event.key.keysym.sym == SDLK_c)
+			cull_method = CULL_BACKFACE;
+		if (event.key.keysym.sym == SDLK_d)
+			cull_method = CULL_NONE;
 		if (event.key.keysym.sym == SDLK_w)
-		{
 			camera.z += 0.1;
-		}
 		if (event.key.keysym.sym == SDLK_s)
-		{
 			camera.z -= 0.1;
-		}
 		if (event.key.keysym.sym == SDLK_g)
-		{
 			show_grid = !show_grid;
-		}
-		if (event.key.keysym.sym == SDLK_q)
-		{
-			cull_faces = !cull_faces;
-		}
 		break;
 	}
 }
@@ -127,9 +102,9 @@ void update()
 	}
 
 	// Increment the rotation of the cube
-	mesh.rotation.y += 0.00;
+	mesh.rotation.y += 0.01;
 	mesh.rotation.x += 0.01;
-	mesh.rotation.z += 0.00;
+	mesh.rotation.z += 0.01;
 
 	int num_faces = mesh.faces.size();
 
@@ -147,8 +122,6 @@ void update()
 		face_vertices[1] = mesh.vertices[mesh_face.b - 1];
 		face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
-		triangle projected_triangle;
-
 		vec3_t transformed_vertices[3];
 		// Loop all three vertices of this current face and apply transformations
 		for (int j = 0; j < 3; j++)
@@ -160,7 +133,7 @@ void update()
 			transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
 			// Translate the camera away from the camera
-			transformed_vertex.z -= camera.z;
+			transformed_vertex.z += 5;
 
 			// Save transformed vertext in the array of transformed vertices
 			transformed_vertices[j] = transformed_vertex;
@@ -171,40 +144,35 @@ void update()
 		vec3_t vector_b = transformed_vertices[1]; /*  / \  */
 		vec3_t vector_c = transformed_vertices[2]; /* C___B */
 
-		// 1. Find vectors B-A and C-A
-		vec3_t vector_ab = vec3_sub(vector_b, vector_a);
-		vec3_t vector_ac = vec3_sub(vector_c, vector_a);
-		vec3_normalize(&vector_ab);
-		vec3_normalize(&vector_ac);
-
-		// 2. Compute face normal using cross product of ab and ac - Order matters based on winding direction
-		vec3_t normal = vec3_cross(vector_ab, vector_ac);
-		vec3_normalize(&normal);
-		
-		// 3. Find the camera ray vector by subtracting the camera position from point A
-		vec3_t camera_ray = vec3_sub({camera.x, camera.y, camera.z}, vector_a);
-		// 4. Take the dot product between the normal N and the camera ray
-		float dot_prod = vec3_dot(normal, camera_ray);
-		// 5. If this dot product is less than zero, then do not display the face
-
-		// If dot product is less than 0 then do not render
-		if (dot_prod < 0 && cull_faces)
+		// // If dot product is less than 0 then do not render
+		if (cull_method == CULL_BACKFACE && is_culled(vector_a, vector_b, vector_c))
 		{
 			continue;
 		}
 
 		// Loop all three transformed vertices to perform projection
+		vec2_t projected_points[3];
 		for (int j = 0; j < 3; j++)
 		{
 			// Apply projection
-			vec2_t projected_point = project(transformed_vertices[j]);
+			projected_points[j] = project(transformed_vertices[j]);
 
 			// Scale and translate the projected point to the middle of the screen
-			projected_point.x += window_width / 2;
-			projected_point.y += window_height / 2;
-
-			projected_triangle.points[j] = projected_point;
+			projected_points[j].x += window_width / 2;
+			projected_points[j].y += window_height / 2;
 		}
+
+		triangle projected_triangle = {
+			{
+				projected_points[0],
+				projected_points[1],
+				projected_points[2],
+			},
+			mesh_face.color
+		};
+
+		// projected_triangle.points[j] = projected_point;
+		// projected_triangle.color = mesh_face.color;
 
 		triangles_to_render.push_back(projected_triangle);
 	}
@@ -220,18 +188,37 @@ void render(void)
 	if (show_grid)
 		draw_grid(color_buffer, 10, C_GREY);
 
+	// Draw the model
 	for (int i = 0; i < mesh.faces.size(); i++)
 	{
 		triangle tri = triangles_to_render[i];
-		draw_triangle(color_buffer, tri, C_TEAL);
 
-		// vec2_t point1 = tri.points[0];
-		// vec2_t point2 = tri.points[1];
-		// vec2_t point3 = tri.points[2];
+		// Draw filled triangles
+		if (render_method == RENDER_FILL_TRIANGLE || render_method == RENDER_FILL_TRIANGLE_WIRE)
+		{
+			draw_filled_triangle(
+				color_buffer,
+				tri.points[0].x, tri.points[0].y, // vertex A
+				tri.points[1].x, tri.points[1].y, // vertex B
+				tri.points[2].x, tri.points[2].y, // vertex C
+				tri.color);
+		}
 
-		// draw_rect(color_buffer, point1.x, point1.y, 4, 4, C_TEAL);
-		// draw_rect(color_buffer, point2.x, point2.y, 4, 4, C_TEAL);
-		// draw_rect(color_buffer, point3.x, point3.y, 4, 4, C_TEAL);
+		// Draw triangle wireframe
+		if (render_method == RENDER_WIRE || render_method == RENDER_WIRE_VERTEX || render_method == RENDER_FILL_TRIANGLE_WIRE)
+		{
+			draw_triangle(
+				color_buffer,
+				tri,
+				C_WHITE);
+		}
+
+		if (render_method == RENDER_WIRE_VERTEX)
+		{
+			draw_rect(color_buffer, tri.points[0].x - 3, tri.points[0].y - 3, 6, 6, C_RED);
+			draw_rect(color_buffer, tri.points[1].x - 3, tri.points[1].y - 3, 6, 6, C_RED);
+			draw_rect(color_buffer, tri.points[2].x - 3, tri.points[2].y - 3, 6, 6, C_RED);
+		}
 	}
 
 	render_color_buffer();			// Render the color buffer to the texture

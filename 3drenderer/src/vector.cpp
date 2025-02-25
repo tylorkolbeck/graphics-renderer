@@ -157,3 +157,4 @@ void vec2_normalize(vec2_t *v)
 		v->y /= magnitude;
 	}
 }
+

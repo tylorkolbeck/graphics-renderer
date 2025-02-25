@@ -18,5 +18,4 @@ typedef struct
     vec3_t rotation = {0, 0, 0};
 } mesh_t;
 
-
-// void load_cube_mesh(void);
+void load_cube_mesh(mesh_t& meshObj);

@@ -11,6 +11,23 @@
 #define FPS 30
 #define FRAME_TARGET_TIME (1000 / FPS)
 
+typedef enum cull_method {
+    CULL_NONE,
+    CULL_BACKFACE
+} cull_method_t;
+
+typedef enum render_method {
+    RENDER_WIRE,
+    RENDER_WIRE_VERTEX,
+    RENDER_FILL_TRIANGLE,
+    RENDER_FILL_TRIANGLE_WIRE
+} render_method_t;
+
+
+
+extern cull_method_t cull_method;
+extern render_method_t render_method;
+
 
 extern SDL_Window* window;
 extern SDL_Renderer* renderer;
@@ -39,7 +56,9 @@ void render_color_buffer(void);
 int loc_1d(int x, int y);
 vec2_t project(vec3_t vert);
 void draw_line(uint32_t* buffer_p, vec2_t a, vec2_t b, uint32_t color);
+void draw_line(uint32_t *buffer_p, int x1, int y1, int x2, int y2, uint32_t color);
 void draw_triangle(uint32_t* buffer_p, triangle tri, uint32_t color);
+bool is_culled(vec3_t a, vec3_t b, vec3_t c);
 
 
 #endif
