@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <iostream>
+#include <algorithm>
 #include "display.h"
 #include "vector.h"
 #include "mesh.h"
@@ -16,12 +17,7 @@ bool is_running = false;
 
 int previous_frame_time = 0;
 
-bool ready_to_process_input = false;
-
-int objX = 200;
-int objY = 200;
-
-std::vector<triangle> triangles_to_render = {};
+std::vector<triangle_t> triangles_to_render = {};
 
 mesh_t mesh = {};
 
@@ -50,8 +46,8 @@ void setup(void)
 		window_width,
 		window_height);
 
-	// load_meshes(mesh);
-	load_cube_mesh(mesh);
+	load_meshes(mesh);
+	// load_cube_mesh(mesh);
 
 	// Flip model
 	mesh.rotation.x = 3.14 / 2;
@@ -61,7 +57,6 @@ void process_input(void)
 {
 	SDL_Event event;
 	SDL_PollEvent(&event);
-	ready_to_process_input = true;
 
 	switch (event.type)
 	{
@@ -93,13 +88,16 @@ void process_input(void)
 	}
 }
 
+bool compareAvg(const triangle_t& a, const triangle_t& b)
+{
+	return a.avg_depth > b.avg_depth;
+}
+
 void update()
 {
 	int time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
 	if (time_to_wait > 0 && time_to_wait <= FRAME_TARGET_TIME)
-	{
 		SDL_Delay(time_to_wait);
-	}
 
 	// Increment the rotation of the cube
 	mesh.rotation.y += 0.01;
@@ -162,36 +160,33 @@ void update()
 			projected_points[j].y += window_height / 2;
 		}
 
-		triangle projected_triangle = {
+		float avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3;
+
+		triangle_t projected_triangle = {
 			{
 				projected_points[0],
 				projected_points[1],
 				projected_points[2],
 			},
-			mesh_face.color
+			mesh_face.color,
+			avg_depth
 		};
-
-		// projected_triangle.points[j] = projected_point;
-		// projected_triangle.color = mesh_face.color;
 
 		triangles_to_render.push_back(projected_triangle);
 	}
+	// Sort the triangles ascending by their avg_depth for painters algorithm
+	std::sort(triangles_to_render.begin(), triangles_to_render.end(), compareAvg);
 }
 
 void render(void)
 {
-	if (!ready_to_process_input)
-	{
-		draw_rect(color_buffer, 10, 10, 50, 50, C_RED);
-	}
-	// Draw grid
 	if (show_grid)
 		draw_grid(color_buffer, 10, C_GREY);
 
 	// Draw the model
-	for (int i = 0; i < mesh.faces.size(); i++)
+	for (int i = 0; i < triangles_to_render.size(); i++)
 	{
-		triangle tri = triangles_to_render[i];
+		triangle_t tri = triangles_to_render[i];
 
 		// Draw filled triangles
 		if (render_method == RENDER_FILL_TRIANGLE || render_method == RENDER_FILL_TRIANGLE_WIRE)

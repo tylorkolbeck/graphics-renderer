@@ -213,7 +213,7 @@ void draw_line(uint32_t *buffer_p, vec2_t a, vec2_t b, uint32_t color)
 	}
 }
 
-void draw_triangle(uint32_t *buffer_p, triangle tri, uint32_t color)
+void draw_triangle(uint32_t *buffer_p, triangle_t tri, uint32_t color)
 {
 	vec2_t p1 = tri.points[0];
 	vec2_t p2 = tri.points[1];
