@@ -3,20 +3,27 @@ CXXFLAGS = -Wall -std=c++17 -g
 LDFLAGS = -lSDL2
 TARGET = 3drenderer
 
-SRCS = $(wildcard src/*.cpp)
-OBJS = $(SRCS:.cpp=.o)
+SRC_DIR = src
+OBJ_DIR = bin/obj
+BIN_DIR = bin
 
-all: $(TARGET)
+SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 
-$(TARGET): $(OBJS)
+all: $(BIN_DIR)/$(TARGET)
+
+$(BIN_DIR)/$(TARGET): $(OBJS)
+	@mkdir -p $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-%.o: %.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(OBJ_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-run:
-	./$(TARGET)
+run: $(BIN_DIR)/$(TARGET)
+	./$(BIN_DIR)/$(TARGET)
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -rf $(OBJ_DIR) $(BIN_DIR)/$(TARGET)
 
+.PHONY: all run clean
