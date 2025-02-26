@@ -2,8 +2,6 @@
 #include "mesh.h"
 #include "color.h"
 
-// mesh_t mesh;	
-
 std::vector<vec3_t> mesh_vertices = {
 	{-1, -1, -1},
 	{-1, 1, -1},

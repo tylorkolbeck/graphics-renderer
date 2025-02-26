@@ -10,7 +10,7 @@
 #include "mesh.h"
 #include "mesh_loader.h"
 #include "color.h"
-
+#include "matrix.h"
 #include <filesystem>
 
 bool is_running = false;
@@ -46,8 +46,8 @@ void setup(void)
 		window_width,
 		window_height);
 
-	load_meshes(mesh);
-	// load_cube_mesh(mesh);
+	// load_meshes(mesh);
+	load_cube_mesh(mesh);
 
 	// Flip model
 	mesh.rotation.x = 3.14 / 2;
@@ -104,6 +104,16 @@ void update()
 	mesh.rotation.x += 0.01;
 	mesh.rotation.z += 0.01;
 
+	// mesh.scale.z += 0.000;
+	mesh.translation.x += 0.002;
+	mesh.translation.z = 5.0;
+
+	// Scale matrix
+	mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+	// Translate matrix
+	mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
+
+
 	int num_faces = mesh.faces.size();
 
 	// Reset faces array
@@ -125,16 +135,20 @@ void update()
 		for (int j = 0; j < 3; j++)
 		{
 			// Apply transformation to put in correct position in the world
-			vec3_t transformed_vertex = face_vertices[j];
-			transformed_vertex = vec3_rotate_y(transformed_vertex, mesh.rotation.y);
-			transformed_vertex = vec3_rotate_x(transformed_vertex, mesh.rotation.x);
-			transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
+			vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
-			// Translate the camera away from the camera
-			transformed_vertex.z += 5;
+			// Scale
+			transformed_vertex = mat4_mul_vec4(scale_matrix, transformed_vertex);
+			// Translate
+			transformed_vertex = mat4_mul_vec4(translation_matrix, transformed_vertex);
 
-			// Save transformed vertext in the array of transformed vertices
-			transformed_vertices[j] = transformed_vertex;
+
+			// transformed_vertex = vec3_rotate_y(transformed_vertex, mesh.rotation.y);
+			// transformed_vertex = vec3_rotate_x(transformed_vertex, mesh.rotation.x);
+			// transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
+
+			// Save transformed vertex in the array of transformed vertices
+			transformed_vertices[j] = vec3_from_vec4(transformed_vertex);
 		}
 
 		// Check backface culling

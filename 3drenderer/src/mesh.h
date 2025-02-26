@@ -16,6 +16,8 @@ typedef struct
     std::vector<vec3_t> vertices;
     std::vector<face> faces;
     vec3_t rotation = {0, 0, 0};
+    vec3_t scale = {1.0, 1.0, 1.0};
+    vec3_t translation = {1.0, 1.0, 1.0};
 } mesh_t;
 
-void load_cube_mesh(mesh_t& meshObj);
+void load_cube_mesh(mesh_t &meshObj);

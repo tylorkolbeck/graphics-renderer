@@ -158,3 +158,12 @@ void vec2_normalize(vec2_t *v)
 	}
 }
 
+vec4_t vec4_from_vec3(vec3_t v)
+{
+	return {v.x, v.y, v.z, 1.0};
+}
+
+vec3_t vec3_from_vec4(vec4_t v)
+{
+	return {v.x, v.y, v.z};
+}
