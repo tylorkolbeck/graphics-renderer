@@ -12,7 +12,7 @@ std::vector<vec3_t> mesh_vertices = {
 	{-1, 1, 1},
 	{-1, -1, 1}};
 
-std::vector<face> mesh_faces = {
+std::vector<face_t> mesh_faces = {
 	// front
 	{1, 2, 3},
 	{1, 3, 4},
@@ -42,25 +42,46 @@ std::vector<vec3_t> cube_mesh_vertices = {
 	{-1, 1, 1},
 	{-1, -1, 1}};
 
-std::vector<face> cube_mesh_faces = {
+std::vector<vec3_t> point_mesh_vertices = {
+	{0.0, 0.0, 0.0}
+};
+
+std::vector<face_t> point_mesh_faces = {
+	{1, 1, 1, DODGER_BLUE}
+};
+
+std::vector<face_t> cube_mesh_faces = {
 	// front
-	{1, 2, 3, DODGER_BLUE},
-	{1, 3, 4, DODGER_BLUE},
+	{1, 2, 3, C_WHITE},
+	{1, 3, 4, C_WHITE},
 	// right
-	{4, 3, 5, C_BLUE},
-	{4, 5, 6, C_BLUE},
+	{4, 3, 5, C_WHITE},
+	{4, 5, 6, C_WHITE},
 	// back
-	{6, 5, 7, C_TEAL},
-	{6, 7, 8, C_TEAL},
+	{6, 5, 7, C_WHITE},
+	{6, 7, 8, C_WHITE},
 	// left
-	{8, 7, 2, C_PINK},
-	{8, 2, 1, C_PINK},
+	{8, 7, 2, C_WHITE},
+	{8, 2, 1, C_WHITE},
 	// top
-	{2, 7, 5, C_GREEN},
-	{2, 5, 3, C_GREEN},
+	{2, 7, 5, C_WHITE},
+	{2, 5, 3, C_WHITE},
 	// bottom
-	{6, 8, 1, C_PINK},
-	{6, 1, 4, C_PINK}};
+	{6, 8, 1, C_WHITE},
+	{6, 1, 4, C_WHITE}};
+
+void load_point_mesh(mesh_t& meshObj)
+{
+	for (int i = 0; i < point_mesh_vertices.size(); i++)
+	{
+		meshObj.vertices.push_back(point_mesh_vertices[i]);
+	}
+
+	for (int i = 0; i < point_mesh_faces.size(); i++)
+	{
+		meshObj.faces.push_back(point_mesh_faces[i]);
+	}
+}
 
 void load_cube_mesh(mesh_t& meshObj)
 {

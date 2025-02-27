@@ -7,7 +7,7 @@ typedef struct {
 	int b;
 	int c;
 	uint32_t color;
-} face;
+} face_t;
 
 typedef struct {
 	vec2_t points[3];

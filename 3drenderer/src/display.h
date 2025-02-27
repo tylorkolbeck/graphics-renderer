@@ -23,25 +23,17 @@ typedef enum render_method {
     RENDER_FILL_TRIANGLE_WIRE
 } render_method_t;
 
-
-
 extern cull_method_t cull_method;
 extern render_method_t render_method;
-
-
 extern SDL_Window* window;
 extern SDL_Renderer* renderer;
 extern uint32_t* color_buffer;
 extern SDL_Texture* color_buffer_texture;
 extern int window_width;
 extern int window_height;
-extern float fov_factor;
 extern vec3_t camera;
-extern bool is_perspective;
 extern bool show_grid;
 extern bool cull_faces;
-
-
 
 bool initialize_window(void);
 void destroy_window(void);
@@ -59,6 +51,7 @@ void draw_line(uint32_t* buffer_p, vec2_t a, vec2_t b, uint32_t color);
 void draw_line(uint32_t *buffer_p, int x1, int y1, int x2, int y2, uint32_t color);
 void draw_triangle(uint32_t* buffer_p, triangle_t tri, uint32_t color);
 bool is_culled(vec3_t a, vec3_t b, vec3_t c);
+bool is_culled(vec4_t vertices[]);
 
 
 #endif

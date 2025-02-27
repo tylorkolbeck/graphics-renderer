@@ -8,9 +8,7 @@ extern uint32_t *color_buffer = NULL;
 extern SDL_Texture *color_buffer_texture = NULL;
 extern int window_width = 800;
 extern int window_height = 600;
-float fov_factor = 640;
 
-bool is_perspective = true;
 bool show_grid = false;
 bool cull_faces = true;
 cull_method_t cull_method = CULL_BACKFACE;
@@ -53,7 +51,7 @@ bool initialize_window(void)
 		return false;
 	}
 
-	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+	// SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 
 	return true;
 }
@@ -156,20 +154,6 @@ int loc_1d(int x, int y)
 	return (window_width * y) + x;
 }
 
-vec2_t project(vec3_t point)
-{
-	if (is_perspective)
-	{
-		return {
-			(point.x * fov_factor) / point.z,
-			(point.y * fov_factor) / point.z};
-	}
-
-	return {
-		(point.x * fov_factor),
-		(point.y * fov_factor)};
-}
-
 void draw_line(uint32_t *buffer_p, int x1, int y1, int x2, int y2, uint32_t color)
 {
 	int dx = x2 - x1;
@@ -190,7 +174,6 @@ void draw_line(uint32_t *buffer_p, int x1, int y1, int x2, int y2, uint32_t colo
 		current_y += y_inc;
 	}
 }
-
 
 void draw_line(uint32_t *buffer_p, vec2_t a, vec2_t b, uint32_t color)
 {
@@ -224,6 +207,31 @@ void draw_triangle(uint32_t *buffer_p, triangle_t tri, uint32_t color)
 	draw_line(buffer_p, p3, p1, color);
 }
 
+bool is_culled(vec4_t vertices[])
+{
+	vec3_t vector_a = vec3_from_vec4(vertices[0]); /* 	A	*/
+	vec3_t vector_b = vec3_from_vec4(vertices[1]); /*  / \  */
+	vec3_t vector_c = vec3_from_vec4(vertices[2]); /* C___B */
+	// 1. Find vectors B-A and C-A
+	vec3_t vector_ab = vec3_sub(vector_b, vector_a);
+	vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+	vec3_normalize(&vector_ab);
+	vec3_normalize(&vector_ac);
+
+	// 2. Compute face normal using cross product of ab and ac - Order matters based on winding direction
+	vec3_t normal = vec3_cross(vector_ab, vector_ac);
+	vec3_normalize(&normal);
+
+	// 3. Find the camera ray vector by subtracting the camera position from point A
+	vec3_t camera_ray = vec3_sub({camera.x, camera.y, camera.z}, vector_a);
+	// 4. Take the dot product between the normal N and the camera ray
+	vec3_normalize(&camera_ray);
+	float dot_prod = vec3_dot(normal, camera_ray);
+	// 5. If this dot product is less than zero, then do not display the face
+
+	return dot_prod < 0;
+}
+
 bool is_culled(vec3_t vector_a, vec3_t vector_b, vec3_t vector_c)
 {
 	// 1. Find vectors B-A and C-A
@@ -238,6 +246,7 @@ bool is_culled(vec3_t vector_a, vec3_t vector_b, vec3_t vector_c)
 
 	// 3. Find the camera ray vector by subtracting the camera position from point A
 	vec3_t camera_ray = vec3_sub({camera.x, camera.y, camera.z}, vector_a);
+	vec3_normalize(&camera_ray);
 	// 4. Take the dot product between the normal N and the camera ray
 	float dot_prod = vec3_dot(normal, camera_ray);
 	// 5. If this dot product is less than zero, then do not display the face
