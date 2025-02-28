@@ -6,13 +6,13 @@
 #include <iostream>
 #include "display.h"
 #include "vector.h"
-#include "mesh_old.h"
 #include "mesh_loader.h"
 #include "color.h"
 #include "matrix.h"
 #include <filesystem>
 #include "light.h"
 #include "Mesh.h"
+#include "ImGuiManager.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_sdl2.h"
@@ -21,6 +21,7 @@
 bool is_running = false;
 int previous_frame_time = 0;
 mat4_t proj_matrix;
+ImGuiManager *imguiManager;
 
 std::vector<triangle_t> triangles_to_render = {};
 
@@ -38,23 +39,11 @@ void setup(void)
 {
 	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
 	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
-
-	// Initialize ImGui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO &io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
-	ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
-	ImGui_ImplSDLRenderer2_Init(renderer);
-	// Set up ImGui with SDL2 and SDL_Renderer
 	SDL_SetRelativeMouseMode(SDL_FALSE); // Disable SDL from hijacking mouse input
-	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
-	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0"); // Prevent minimizing when clicking outside
 	SDL_SetWindowGrab(window, SDL_FALSE);					 // Ensure SDL does not "trap" mouse inside window
 
-	// Set default font to avoid rendering issues
-	io.Fonts->AddFontDefault();
+	imguiManager = new ImGuiManager(window, renderer);
 
 	render_method = RENDER_FILL_TRIANGLE;
 	cull_method = CULL_BACKFACE;
@@ -90,10 +79,10 @@ void process_input(void)
 
 	while (SDL_PollEvent(&event))
 	{
-		ImGui_ImplSDL2_ProcessEvent(&event); // Send event to ImGui
-
+		imguiManager->processEvent(event);
 		// Check if ImGui wants to capture the event (prevents SDL from handling ImGui clicks)
 		ImGuiIO &io = ImGui::GetIO();
+
 		if (io.WantCaptureMouse || io.WantCaptureKeyboard)
 			continue;
 
@@ -134,7 +123,7 @@ void update()
 
 	if (time_to_wait > 0 && time_to_wait <= FRAME_TARGET_TIME)
 		SDL_Delay(time_to_wait);
-	previous_frame_time - SDL_GetTicks();
+	previous_frame_time = SDL_GetTicks();
 
 	// Update the mesh
 	f22Mesh.rotate({.x = f22Mesh.rotation().x + 0.005f, .y = 0.0, .z = 0.0});
@@ -144,10 +133,7 @@ void update()
 
 void render(void)
 {
-	// Start a new ImGui frame
-	ImGui_ImplSDL2_NewFrame();
-	ImGui_ImplSDLRenderer2_NewFrame();
-	ImGui::NewFrame();
+	imguiManager->beginFrame();
 
 	// Show a simple test window
 	ImGui::Begin("Hello ImGui");
@@ -163,10 +149,7 @@ void render(void)
 	render_color_buffer();			// Render the color buffer to the texture
 	clear_color_buffer(0xFF000000); // Set each pixel to yellow color in buffer
 
-	// Render everything
-	ImGui::Render();
-	ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
-
+	imguiManager->endFrame();
 	SDL_RenderPresent(renderer);
 }
 
@@ -183,6 +166,7 @@ int main(int argc, char *args[])
 		render();
 	}
 
+	delete imguiManager;
 	destroy_window();
 
 	return 0;

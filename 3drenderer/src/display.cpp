@@ -26,7 +26,7 @@ bool initialize_window(void)
 		return false;
 	}
 
-	Uint32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
+	Uint32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_BORDERLESS;
 
 	// Query SDL to get fullscreen max width and height
 	SDL_DisplayMode display_mode;
@@ -41,6 +41,8 @@ bool initialize_window(void)
 							  window_width,
 							  window_height,
 							  window_flags);
+	SDL_SetWindowSize(window, window_width, window_height);
+	SDL_SetWindowPosition(window, 0, 0);
 
 	if (!window)
 	{
