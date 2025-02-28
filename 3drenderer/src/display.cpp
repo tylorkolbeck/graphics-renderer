@@ -1,6 +1,8 @@
+#include <cmath>
 #include "display.h"
 #include "triangles.h"
-#include <cmath>
+#include "color.h"
+
 
 extern SDL_Window *window = NULL;
 extern SDL_Renderer *renderer = NULL;
@@ -43,7 +45,6 @@ bool initialize_window(void)
 		return false;
 	}
 
-	// TODO: Create SDL renderer
 	renderer = SDL_CreateRenderer(window, -1, 0);
 	if (!renderer)
 	{
@@ -103,6 +104,17 @@ void draw_rect(uint32_t *buffer_p, int xloc, int yloc, int width, int height, ui
 		for (int y = yloc; y <= yloc + height - 1; y++)
 		{
 			draw_pixel(buffer_p, x, y, color);
+		}
+	}
+}
+
+void draw_rect(uint32_t *buffer_p, int xloc, int yloc, int width, int height)
+{
+	for (int x = xloc; x <= xloc + width - 1; x++)
+	{
+		for (int y = yloc; y <= yloc + height - 1; y++)
+		{
+			draw_pixel(buffer_p, x, y, Color::ORANGE);
 		}
 	}
 }

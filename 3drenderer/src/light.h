@@ -2,9 +2,9 @@
 #include "vector.h"
 #include <stdint.h>
 
-typedef struct {
+struct light_t {
     vec3_t direction;
-} light_t;
+};
 
 extern light_t light;
 

@@ -50,52 +50,6 @@ void fill_flat_top_triangle(uint32_t *buffer_p, int x0, int y0, int x1, int y1, 
     }
 }
 
-// TODO: Fix this function, the vector swap messes things up
-// void sort_vertices_by_y(vec2_t &v0, vec2_t &v1, vec2_t v2)
-// {
-//     if (v0.y > v1.y)
-//     {
-//         std::swap(v0, v1);
-//     }
-//     if (v1.y > v2.y)
-//     {
-//         std::swap(v1, v2);
-//     }
-//     if (v0.y > v2.y)
-//     {
-//         std::swap(v0, v2);
-//     }
-// }
-
-// TODO: Fix this function, the vector swap messes things up
-// void draw_filled_triangle(uint32_t *buffer_p, triangle tri, uint32_t color)
-// {
-//     // Sort the vertices
-//     vec2_t v0 = tri.points[0];
-//     vec2_t v1 = tri.points[1];
-//     vec2_t v2 = tri.points[2];
-
-//     sort_vertices_by_y(v0, v1, v2);
-
-//     if (v1.y == v2.y)
-//     {
-//         fill_flat_bottom_triangle(buffer_p, v0.x, v0.y, v1.x, v1.y, v2.x, v2.y, 0xFF00FF00);
-//     }
-//     else if (v0.y == v1.y)
-//     {
-//         fill_flat_top_triangle(buffer_p, v0.x, v0.y, v1.x, v1.y, v2.x, v2.y, 0xFFFF0000);
-//     }
-//     else
-//     {
-//         // Find the midpoint
-//         vec2_t md{};
-//         md.x = ((float)((v2.x - v0.x) * (v1.y - v0.y)) / (float)(v2.y - v0.y)) + v0.x;
-//         md.y = v1.y;
-//         fill_flat_bottom_triangle(buffer_p, v0.x, v0.y, v1.x, v1.y, md.x, md.y, 0xFF00FF00);
-//         fill_flat_top_triangle(buffer_p, v1.x, v1.y, md.x, md.y, v2.x, v2.y, 0xFFFF0000);
-//     }
-// }
-
 void draw_filled_triangle(uint32_t *buffer_p, int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
 {
     // We need to sort the vertices by y-coordinate ascending (y0 < y1 < y2)
@@ -137,4 +91,9 @@ void draw_filled_triangle(uint32_t *buffer_p, int x0, int y0, int x1, int y1, in
         // Draw flat-top triangle
         fill_flat_top_triangle(buffer_p, x1, y1, Mx, My, x2, y2, color);
     }
+}
+
+bool compareAvg(const triangle_t &a, const triangle_t &b)
+{
+	return a.avg_depth > b.avg_depth;
 }

@@ -1,5 +1,5 @@
 #include <vector>
-#include "mesh.h"
+#include "mesh_old.h"
 #include "color.h"
 
 std::vector<vec3_t> mesh_vertices = {
@@ -47,28 +47,28 @@ std::vector<vec3_t> point_mesh_vertices = {
 };
 
 std::vector<face_t> point_mesh_faces = {
-	{1, 1, 1, DODGER_BLUE}
+	{1, 1, 1, Color::DODGER_BLUE}
 };
 
 std::vector<face_t> cube_mesh_faces = {
 	// front
-	{1, 2, 3, C_WHITE},
-	{1, 3, 4, C_WHITE},
+	{1, 2, 3, Color::C_WHITE},
+	{1, 3, 4, Color::C_WHITE},
 	// right
-	{4, 3, 5, C_WHITE},
-	{4, 5, 6, C_WHITE},
+	{4, 3, 5, Color::C_WHITE},
+	{4, 5, 6, Color::C_WHITE},
 	// back
-	{6, 5, 7, C_WHITE},
-	{6, 7, 8, C_WHITE},
+	{6, 5, 7, Color::C_WHITE},
+	{6, 7, 8, Color::C_WHITE},
 	// left
-	{8, 7, 2, C_WHITE},
-	{8, 2, 1, C_WHITE},
+	{8, 7, 2, Color::C_WHITE},
+	{8, 2, 1, Color::C_WHITE},
 	// top
-	{2, 7, 5, C_WHITE},
-	{2, 5, 3, C_WHITE},
+	{2, 7, 5, Color::C_WHITE},
+	{2, 5, 3, Color::C_WHITE},
 	// bottom
-	{6, 8, 1, C_WHITE},
-	{6, 1, 4, C_WHITE}};
+	{6, 8, 1, Color::C_WHITE},
+	{6, 1, 4, Color::C_WHITE}};
 
 void load_point_mesh(mesh_t& meshObj)
 {

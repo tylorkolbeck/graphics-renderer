@@ -1,6 +1,11 @@
 #include <math.h>
 #include "matrix.h"
 
+mat4_t operator*(const mat4_t &a, const mat4_t &b)
+{
+    return mat4_mul_mat4(a, b);
+}
+
 mat4_t mat4_identity(void)
 {
     // | 1 0 0 0 |
@@ -54,6 +59,11 @@ mat4_t mat4_make_rotation_x(float angle)
     m.m[2][1] = s;
     m.m[2][2] = c;
     return m;
+}
+
+mat4_t mat4_make_rotation(vec3_t rotationVector)
+{
+    return mat4_make_rotation_x(rotationVector.x) * mat4_make_rotation_x(rotationVector.y) * mat4_make_rotation_x(rotationVector.z);
 }
 
 mat4_t mat4_make_rotation_y(float angle)

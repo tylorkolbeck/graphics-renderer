@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -std=c++17 -g
+CXXFLAGS = -Wall -std=c++17 -g -Iinclude -I$(IMGUI_DIR)
 LDFLAGS = -lSDL2
 TARGET = 3drenderer
 
@@ -7,7 +7,10 @@ SRC_DIR = src
 OBJ_DIR = bin/obj
 BIN_DIR = bin
 
-SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+IMGUI_DIR = libs/imgui
+IMGUI_SRC = $(wildcard $(IMGUI_DIR)/*.cpp)
+
+SRCS = $(wildcard $(SRC_DIR)/*.cpp) $(IMGUI_SRC)
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 
 all: $(BIN_DIR)/$(TARGET)

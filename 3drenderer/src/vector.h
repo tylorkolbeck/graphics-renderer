@@ -27,6 +27,7 @@ vec2_t vec2_mult(vec2_t v, float factor);
 vec2_t vec2_div(vec2_t v, float factor);
 float vec2_dot(vec2_t a, vec2_t b);
 void vec2_normalize(vec2_t* v);
+vec3_t vec3_inverse(vec3_t v);
 
 
 // Vector 3 functions

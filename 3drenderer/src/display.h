@@ -23,6 +23,11 @@ typedef enum render_method {
     RENDER_FILL_TRIANGLE_WIRE
 } render_method_t;
 
+struct Window {
+    int width;
+    int height;
+};
+
 extern cull_method_t cull_method;
 extern render_method_t render_method;
 extern SDL_Window* window;
@@ -41,6 +46,7 @@ void draw_grid(uint32_t* buffer_p, int cellSize, uint32_t color);
 void draw_dot(uint32_t* buffer_p, int cellSize, uint32_t color);
 void draw_pixel(uint32_t* buffer_p, int x, int y, uint32_t color);
 void draw_rect(uint32_t* buffer_p, int xloc, int yloc, int width, int height, uint32_t color);
+void draw_rect(uint32_t *buffer_p, int xloc, int yloc, int width, int height);
 void create_color_buffer_32(uint32_t** bufferP, int size);
 void clear_color_buffer(uint32_t color);
 void setBufferPixel(int row, int col, uint32_t color);

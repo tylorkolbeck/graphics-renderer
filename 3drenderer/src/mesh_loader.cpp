@@ -6,7 +6,7 @@
 #include <cstring>
 #include <filesystem>
 #include <sstream>
-#include "mesh.h"
+#include "mesh_old.h"
 #include "color.h"
 
 void parse_obj_file(std::string& path, mesh_t& meshObj)
@@ -31,7 +31,7 @@ void parse_obj_file(std::string& path, mesh_t& meshObj)
             parseFace(line, meshObj.faces);
         }
     }
-    std::cout << "Number of vertices: " << meshObj.vertices.size() << " Number of faces: " << meshObj.faces.size() << std::endl;
+    std::cout << "Loaded:  " << path << " Vertices: " << meshObj.vertices.size() << " Faces: " << meshObj.faces.size() << std::endl;
 }
 
 void parseFace(const std::string& line, std::vector<face_t>& mesh_faces) 
@@ -40,7 +40,7 @@ void parseFace(const std::string& line, std::vector<face_t>& mesh_faces)
     std::string prefix;
     face_t face;
 
-    face.color = C_LIGHTGREY; // Default light grey for faces
+    face.color = Color::C_LIGHTGREY; // Default light grey for faces
     
     ss >> prefix; // Read "f"
     

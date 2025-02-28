@@ -31,6 +31,15 @@ vec3_t vec3_rotate_z(vec3_t v, float angle)
 	return rotated;
 }
 
+vec3_t vec3_inverse(vec3_t v)
+{
+	return {
+		-v.x, 
+		-v.y,
+		-v.z
+	};
+}
+
 float vec2_length(vec2_t v)
 {
 	return sqrt(v.x * v.x + v.y * v.y);

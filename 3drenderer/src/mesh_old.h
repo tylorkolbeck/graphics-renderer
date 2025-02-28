@@ -21,4 +21,4 @@ typedef struct
 } mesh_t;
 
 void load_cube_mesh(mesh_t &meshObj);
-void load_point_mesh(mesh_t& meshObj);
+void load_point_mesh(mesh_t &meshObj);

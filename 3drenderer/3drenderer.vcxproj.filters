@@ -44,7 +44,7 @@
     <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mesh.h">
+    <ClInclude Include="mesh_old.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="triangles.h">
