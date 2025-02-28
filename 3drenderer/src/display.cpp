@@ -2,7 +2,8 @@
 #include "display.h"
 #include "triangles.h"
 #include "color.h"
-
+#include <imgui_impl_sdlrenderer2.h>
+#include <imgui_impl_sdl2.h>
 
 extern SDL_Window *window = NULL;
 extern SDL_Renderer *renderer = NULL;
@@ -25,6 +26,8 @@ bool initialize_window(void)
 		return false;
 	}
 
+	Uint32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
+
 	// Query SDL to get fullscreen max width and height
 	SDL_DisplayMode display_mode;
 	SDL_GetCurrentDisplayMode(0, &display_mode);
@@ -32,12 +35,12 @@ bool initialize_window(void)
 	window_height = display_mode.h;
 
 	// Create SDL window
-	window = SDL_CreateWindow(NULL,
+	window = SDL_CreateWindow("SDL + ImGui",
 							  SDL_WINDOWPOS_CENTERED,
 							  SDL_WINDOWPOS_CENTERED,
 							  window_width,
 							  window_height,
-							  SDL_WINDOW_BORDERLESS);
+							  window_flags);
 
 	if (!window)
 	{
@@ -59,10 +62,19 @@ bool initialize_window(void)
 
 void destroy_window(void)
 {
+	// Cleanup ImGui
+	ImGui_ImplSDLRenderer2_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
+
 	free(color_buffer);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+
+	// ImGui_ImplSDLRenderer2_Shutdown();
+	// ImGui_ImplSDL2_Shutdown();
+	// ImGui::DestroyContext();
 }
 
 void draw_grid(uint32_t *buffer_p, int cellSize, uint32_t color)
