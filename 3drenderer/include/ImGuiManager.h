@@ -4,6 +4,8 @@
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 #include <SDL2/SDL.h>
+#include "ImGuiWidget.h"
+#include <vector>
 
 class ImGuiManager
 {
@@ -15,7 +17,10 @@ public:
     void beginFrame();
     void endFrame();
 
+    void addWidget(ImGuiWidget* widget);
+
 private:
     SDL_Window *m_window;
     SDL_Renderer *m_renderer;
+    std::vector<ImGuiWidget*> m_widgets;
 };

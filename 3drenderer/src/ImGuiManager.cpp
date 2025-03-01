@@ -18,10 +18,6 @@ ImGuiManager::ImGuiManager(SDL_Window *window, SDL_Renderer *renderer)
     
     // Set default font
     io.Fonts->AddFontDefault();
-
-	// Set default font to avoid rendering issues
-	io.Fonts->AddFontDefault();
-
 }
 
 ImGuiManager::~ImGuiManager()
@@ -46,6 +42,16 @@ void ImGuiManager::beginFrame()
 
 void ImGuiManager::endFrame()
 {
+    for (ImGuiWidget* widget : m_widgets)
+    {
+        widget->render();
+    }
+    
     ImGui::Render();
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_renderer);
+}
+
+void ImGuiManager::addWidget(ImGuiWidget* widget)
+{
+    m_widgets.push_back(widget);
 }

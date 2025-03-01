@@ -13,6 +13,8 @@
 #include "light.h"
 #include "Mesh.h"
 #include "ImGuiManager.h"
+#include "w_HelloWindow.h"
+#include "w_FPSCounter.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_sdl2.h"
@@ -21,9 +23,15 @@
 bool is_running = false;
 int previous_frame_time = 0;
 mat4_t proj_matrix;
+
+// ImGui
 ImGuiManager *imguiManager;
+// ImGui Widgets
+w_HelloWindow *w_helloWindow;
+w_FPSCounter *w_fpsCounter;
 
 std::vector<triangle_t> triangles_to_render = {};
+std::string file_path = "assets/f22.obj";
 
 vec3_t light_direction{0, 0, 0};
 
@@ -31,13 +39,19 @@ Mesh f22Mesh{};
 
 void setup(void)
 {
+	imguiManager = new ImGuiManager(window, renderer);
 	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
 	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
 	SDL_SetRelativeMouseMode(SDL_FALSE); // Disable SDL from hijacking mouse input
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0"); // Prevent minimizing when clicking outside
 	SDL_SetWindowGrab(window, SDL_FALSE);					 // Ensure SDL does not "trap" mouse inside window
 
-	imguiManager = new ImGuiManager(window, renderer);
+	// Register Widgets
+	w_helloWindow = new w_HelloWindow();
+	w_fpsCounter = new w_FPSCounter();
+	imguiManager->addWidget(w_helloWindow);
+	imguiManager->addWidget(w_fpsCounter);
+
 
 	render_method = RENDER_FILL_TRIANGLE;
 	cull_method = CULL_BACKFACE;
@@ -63,7 +77,6 @@ void setup(void)
 	float zfar = 100.0;
 	proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
-	std::string file_path = "assets/space_ship.obj";
 	f22Mesh = Mesh(file_path);
 }
 
@@ -115,8 +128,8 @@ void update()
 {
 	int time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
 
-	if (time_to_wait > 0 && time_to_wait <= FRAME_TARGET_TIME)
-		SDL_Delay(time_to_wait);
+	// if (time_to_wait > 0 && time_to_wait <= FRAME_TARGET_TIME)
+	// 	SDL_Delay(time_to_wait);
 	previous_frame_time = SDL_GetTicks();
 
 	// Update the mesh
@@ -130,10 +143,10 @@ void render(void)
 {
 	imguiManager->beginFrame();
 
-	// Show a simple test window
-	ImGui::Begin("Hello ImGui");
-	ImGui::Text("This is a test window inside SDL2!");
-	ImGui::End();
+	// // Show a simple test window
+	// ImGui::Begin("Hello ImGui");
+	// ImGui::Text("This is a test window inside SDL2!");
+	// ImGui::End();
 
 	if (show_grid)
 		draw_grid(color_buffer, 10, Color::C_LIGHTGREY);
