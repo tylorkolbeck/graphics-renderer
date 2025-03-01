@@ -29,12 +29,6 @@ vec3_t light_direction{0, 0, 0};
 
 Mesh f22Mesh{};
 
-void load_meshes(mesh_t &mesh)
-{
-	std::string file_path = "assets/f22.obj";
-	parse_obj_file(file_path, mesh);
-}
-
 void setup(void)
 {
 	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
@@ -69,7 +63,7 @@ void setup(void)
 	float zfar = 100.0;
 	proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
-	std::string file_path = "assets/f22.obj";
+	std::string file_path = "assets/space_ship.obj";
 	f22Mesh = Mesh(file_path);
 }
 
@@ -106,10 +100,10 @@ void process_input(void)
 				cull_method = CULL_BACKFACE;
 			if (event.key.keysym.sym == SDLK_d)
 				cull_method = CULL_NONE;
-			// if (event.key.keysym.sym == SDLK_w)
-			// 	camera.z += 0.1;
-			// if (event.key.keysym.sym == SDLK_s)
-			// 	camera.z -= 0.1;
+			if (event.key.keysym.sym == SDLK_w)
+				camera.z += 0.1;
+			if (event.key.keysym.sym == SDLK_s)
+				camera.z -= 0.1;
 			if (event.key.keysym.sym == SDLK_g)
 				show_grid = !show_grid;
 			break;
@@ -127,7 +121,8 @@ void update()
 
 	// Update the mesh
 	f22Mesh.rotate({.x = f22Mesh.rotation().x + 0.005f, .y = 0.0, .z = 0.0});
-	f22Mesh.translate({.x = 0.0, .y = 0.0f, .z = 5.0f});
+	// f22Mesh.rotate({.x = 0.0, .y = 0.0, .z = 0.0});
+	f22Mesh.translate({.x = 0.0, .y = 0.0f, .z = 10.0f});
 	f22Mesh.update(camera, proj_matrix, light, true, {width : window_width, height : window_height});
 }
 
