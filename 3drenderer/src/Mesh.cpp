@@ -2,14 +2,14 @@
 #include "light.h"
 
 Mesh::Mesh()
-	: m_rotation{0,0,0},
-	m_scale{1,1, 1},
-	m_translation{0,0,0}
+	: m_rotation{0, 0, 0},
+	  m_scale{1, 1, 1},
+	  m_position{0, 0, 0}
 {
 }
 
 Mesh::Mesh(std::vector<vec3_t> vertices, std::vector<face_t> faces) : m_vertices{vertices},
-                                                                      m_faces{faces}
+																	  m_faces{faces}
 {
 }
 
@@ -31,7 +31,7 @@ void Mesh::scale(vec3_t scale)
 
 void Mesh::translate(vec3_t translation)
 {
-	m_translation = translation;
+	m_position = translation;
 }
 
 // TODO: Refactor this method
@@ -51,7 +51,7 @@ void Mesh::update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, W
 
 	for (int i = 0; i < faceCount(); i++)
 	{
-		const face_t& mesh_face = faces()[i];
+		const face_t &mesh_face = faces()[i];
 		vec3_t face_vertices[3];
 
 		face_vertices[0] = vertices()[mesh_face.a - 1];
@@ -122,13 +122,12 @@ void Mesh::update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, W
 				.color = triangle_color,
 				.avg_depth = avg_depth};
 
-				m_render_queue.push_back(projected_triangle);
+			m_render_queue.push_back(projected_triangle);
 		}
 	}
 
 	std::sort(m_render_queue.begin(), m_render_queue.end(), compareAvg);
 }
-
 
 void Mesh::render(uint32_t *color_buffer)
 {
@@ -165,82 +164,89 @@ void Mesh::render(uint32_t *color_buffer)
 	}
 }
 
-vec3_t Mesh::rotation()
+vec3_t &Mesh::rotation()
 {
-    return m_rotation;
+	return m_rotation;
 }
 
-vec3_t Mesh::scale()
+vec3_t& Mesh::scale()
 {
-    return m_scale;
+	return m_scale;
 }
 
-vec3_t Mesh::translation()
+vec3_t& Mesh::translation()
 {
-    return m_translation;
+	return m_position;
+}
+
+vec3_t& Mesh::position()
+{
+	return m_position;
 }
 
 int Mesh::faceCount()
 {
-    return m_faces.size();
+	return m_faces.size();
 }
 
-const std::vector<vec3_t>& Mesh::vertices()
+const std::vector<vec3_t> &Mesh::vertices()
 {
-    return m_vertices;
+	return m_vertices;
 }
 
-const std::vector<face_t>& Mesh::faces()
+const std::vector<face_t> &Mesh::faces()
 {
-    return m_faces;
+	return m_faces;
 }
 
-void Mesh::parse_obj_file(const std::string& path)
+void Mesh::parse_obj_file(const std::string &path)
 {
-    std::ifstream file;
-    file.open(path);
+	std::ifstream file;
+	file.open(path);
 
+	std::string line;
+	while (std::getline(file, line))
+	{
+		if (line.empty())
+			continue;
 
-    std::string line;
-    while (std::getline(file, line))
-    {
-        if (line.empty()) continue;
-
-        if (line[0] == 'v' && line[1] == ' ')
-        {
-            vec3_t vertex;
-            sscanf(line.c_str(), "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
-            m_vertices.push_back(vertex);
-        }
-        else if (line[0] == 'f' && line[1] == ' ')
-        {
-            parseFace(line);
-        }
-    }
-    std::cout << "[Loaded Mesh]: " << path << " Vertices: " << m_vertices.size() << " Faces: " << m_faces.size() << std::endl;
+		if (line[0] == 'v' && line[1] == ' ')
+		{
+			vec3_t vertex;
+			sscanf(line.c_str(), "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
+			m_vertices.push_back(vertex);
+		}
+		else if (line[0] == 'f' && line[1] == ' ')
+		{
+			parseFace(line);
+		}
+	}
+	std::cout << "[Loaded Mesh]: " << path << " Vertices: " << m_vertices.size() << " Faces: " << m_faces.size() << std::endl;
 }
 
-
-void Mesh::parseFace(const std::string& line) 
+void Mesh::parseFace(const std::string &line)
 {
-    std::istringstream ss(line);
-    std::string prefix;
-    face_t face;
+	std::istringstream ss(line);
+	std::string prefix;
+	face_t face;
 
-    face.color = Color::C_LIGHTGREY; // Default light grey for faces
-    
-    ss >> prefix; // Read "f"
-    
-    char slash; // To consume the '/' characters
-    int v; // Temporary variable for vertex index
+	face.color = Color::C_LIGHTGREY; // Default light grey for faces
 
-    // Read up to 4 vertices per face
-    if (ss >> face.a >> slash >> v >> slash >> v &&
-        ss >> face.b >> slash >> v >> slash >> v &&
-        ss >> face.c >> slash >> v >> slash >> v) {
+	ss >> prefix; // Read "f"
 
-        m_faces.push_back(face);
-    } else {
-        std::cerr << "Error parsing face: " << line << std::endl;
-    }
+	char slash; // To consume the '/' characters
+	int v;		// Temporary variable for vertex index
+
+	// Read up to 4 vertices per face
+	if (ss >> face.a >> slash >> v >> slash >> v &&
+		ss >> face.b >> slash >> v >> slash >> v &&
+		ss >> face.c >> slash >> v >> slash >> v)
+	{
+
+		m_faces.push_back(face);
+	}
+	else
+	{
+		std::cerr << "Error parsing face: " << line << std::endl;
+	}
 }

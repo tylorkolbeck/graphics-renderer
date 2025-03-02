@@ -15,6 +15,7 @@
 #include "ImGuiManager.h"
 #include "w_HelloWindow.h"
 #include "w_FPSCounter.h"
+#include "w_Transform.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_sdl2.h"
@@ -29,6 +30,7 @@ ImGuiManager *imguiManager;
 // ImGui Widgets
 w_HelloWindow *w_helloWindow;
 w_FPSCounter *w_fpsCounter;
+w_Transform *w_transform;
 
 std::vector<triangle_t> triangles_to_render = {};
 std::string file_path = "assets/f22.obj";
@@ -42,16 +44,9 @@ void setup(void)
 	imguiManager = new ImGuiManager(window, renderer);
 	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
 	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
-	SDL_SetRelativeMouseMode(SDL_FALSE); // Disable SDL from hijacking mouse input
+	SDL_SetRelativeMouseMode(SDL_FALSE);					 // Disable SDL from hijacking mouse input
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0"); // Prevent minimizing when clicking outside
 	SDL_SetWindowGrab(window, SDL_FALSE);					 // Ensure SDL does not "trap" mouse inside window
-
-	// Register Widgets
-	w_helloWindow = new w_HelloWindow();
-	w_fpsCounter = new w_FPSCounter();
-	imguiManager->addWidget(w_helloWindow);
-	imguiManager->addWidget(w_fpsCounter);
-
 
 	render_method = RENDER_FILL_TRIANGLE;
 	cull_method = CULL_BACKFACE;
@@ -78,6 +73,14 @@ void setup(void)
 	proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
 	f22Mesh = Mesh(file_path);
+	f22Mesh.translate({0.0f, 0.0f, 10.0f});
+	// Register Widgets
+	w_helloWindow = new w_HelloWindow();
+	w_fpsCounter = new w_FPSCounter();
+	w_transform = new w_Transform("Transform", f22Mesh.rotation(), f22Mesh.scale(), f22Mesh.translation());
+	imguiManager->addWidget(w_helloWindow);
+	imguiManager->addWidget(w_fpsCounter);
+	imguiManager->addWidget(w_transform);
 }
 
 void process_input(void)
@@ -133,9 +136,7 @@ void update()
 	previous_frame_time = SDL_GetTicks();
 
 	// Update the mesh
-	f22Mesh.rotate({.x = f22Mesh.rotation().x + 0.005f, .y = 0.0, .z = 0.0});
-	// f22Mesh.rotate({.x = 0.0, .y = 0.0, .z = 0.0});
-	f22Mesh.translate({.x = 0.0, .y = 0.0f, .z = 10.0f});
+	// f22Mesh.translate({.x = 0.0, .y = 0.0f, .z = 10.0f});
 	f22Mesh.update(camera, proj_matrix, light, true, {width : window_width, height : window_height});
 }
 

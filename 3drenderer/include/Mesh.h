@@ -24,7 +24,7 @@ private:
     std::vector<face_t> m_faces{};
     vec3_t m_rotation{0.0f, 0.0f, 0.0f};
     vec3_t m_scale{1.0f, 1.0f, 1.0f};
-    vec3_t m_translation{0.0f, 0.0f, 0.0f};
+    vec3_t m_position{0.0f, 0.0f, 0.0f};
     std::vector<triangle_t> m_render_queue;
     void parse_obj_file(const std::string &path);
     void parseFace(const std::string &line);
@@ -36,9 +36,10 @@ public:
     void rotate(vec3_t rotation);
     void scale(vec3_t scale);
     void translate(vec3_t translation);
-    vec3_t rotation();
-    vec3_t scale();
-    vec3_t translation();
+    vec3_t& rotation();
+    vec3_t& scale();
+    vec3_t& translation();
+    vec3_t& position();
     int faceCount();
     const std::vector<vec3_t>& vertices();
     const std::vector<face_t>& faces();

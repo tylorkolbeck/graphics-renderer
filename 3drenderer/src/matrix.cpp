@@ -63,7 +63,7 @@ mat4_t mat4_make_rotation_x(float angle)
 
 mat4_t mat4_make_rotation(vec3_t rotationVector)
 {
-    return mat4_make_rotation_x(rotationVector.x) * mat4_make_rotation_x(rotationVector.y) * mat4_make_rotation_x(rotationVector.z);
+    return mat4_make_rotation_x(rotationVector.x) * mat4_make_rotation_y(rotationVector.y) * mat4_make_rotation_z(rotationVector.z);
 }
 
 mat4_t mat4_make_rotation_y(float angle)

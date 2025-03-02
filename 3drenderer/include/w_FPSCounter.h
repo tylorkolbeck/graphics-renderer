@@ -4,7 +4,11 @@
 
 class w_FPSCounter : public ImGuiWidget
 {
-    public:
+public:
+    void update() override
+    {
+    }
+
     void render() override
     {
         static float fps = 0.0f;

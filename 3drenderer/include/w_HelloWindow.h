@@ -4,7 +4,11 @@
 
 class w_HelloWindow : public ImGuiWidget
 {
-    public:
+public:
+    void update() override
+    {
+    }
+
     void render() override
     {
         ImGui::Begin("Hello ImGui");
