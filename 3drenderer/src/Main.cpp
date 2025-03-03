@@ -16,6 +16,7 @@
 #include "w_FPSCounter.h"
 #include "w_Transform.h"
 #include "Window.h"
+#include "GameEngine.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_sdl2.h"
@@ -39,7 +40,7 @@ std::string file_path = "assets/f22.obj";
 
 vec3_t light_direction{0, 0, 0};
 
-Mesh f22Mesh{};
+Mesh mesh{};
 
 void setup(void)
 {
@@ -74,12 +75,12 @@ void setup(void)
 	float zfar = 100.0;
 	proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
-	f22Mesh = Mesh(file_path);
-	f22Mesh.translate({0.0f, 0.0f, 10.0f});
+	mesh = Mesh(file_path);
+	mesh.translate({0.0f, 0.0f, 10.0f});
 	// Register Widgets
 	w_helloWindow = new w_HelloWindow();
 	w_fpsCounter = new w_FPSCounter();
-	w_transform = new w_Transform("Transform", f22Mesh.rotation(), f22Mesh.scale(), f22Mesh.translation());
+	w_transform = new w_Transform("Transform", mesh.rotation(), mesh.scale(), mesh.translation());
 	imguiManager->addWidget(w_helloWindow);
 	imguiManager->addWidget(w_fpsCounter);
 	imguiManager->addWidget(w_transform);
@@ -137,8 +138,7 @@ void update()
 	previous_frame_time = SDL_GetTicks();
 
 	// Update the mesh
-	// f22Mesh.translate({.x = 0.0, .y = 0.0f, .z = 10.0f});
-	f22Mesh.update(camera, proj_matrix, light, true, {width : window->getWidth(), height : window->getHeight()});
+	mesh.update(camera, proj_matrix, light, true, {width : window->getWidth(), height : window->getHeight()});
 }
 
 void render(void)
@@ -154,7 +154,7 @@ void render(void)
 		draw_grid(color_buffer, 10, Color::C_LIGHTGREY);
 
 	// Draw the model
-	f22Mesh.render(color_buffer);
+	mesh.render(color_buffer);
 
 	render_color_buffer();			// Render the color buffer to the texture
 	clear_color_buffer(0xFF000000); // Set each pixel to yellow color in buffer
@@ -163,8 +163,12 @@ void render(void)
 	SDL_RenderPresent(renderer);
 }
 
+GameEngine *gameEngine;
+
 int main(int argc, char *args[])
 {
+	// gameEngine = new GameEngine("3D Engine", 1080, 720, true);
+	// gameEngine->Init();
 	setup();
 
 	while (is_running)

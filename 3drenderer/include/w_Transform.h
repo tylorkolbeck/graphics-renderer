@@ -40,14 +40,14 @@ public:
         else
         {
             ImGui::DragFloat("X##4", &m_scale.x, 0.1f, 0.0f, 0.0f, "%.3f");
-            ImGui::DragFloat("X##5", &m_scale.y, 0.1f, 0.0f, 0.0f, "%.3f");
-            ImGui::DragFloat("X##6", &m_scale.z, 0.1f, 0.0f, 0.0f, "%.3f");
+            ImGui::DragFloat("Y##5", &m_scale.y, 0.1f, 0.0f, 0.0f, "%.3f");
+            ImGui::DragFloat("Z##6", &m_scale.z, 0.1f, 0.0f, 0.0f, "%.3f");
         }
 
         ImGui::Text("Position");
         ImGui::DragFloat("X##7", &m_position.x, 0.1f, 0.0f, 0.0f, "%.3f");
-        ImGui::DragFloat("X##8", &m_position.y, 0.1f, 0.0f, 0.0f, "%.3f");
-        ImGui::DragFloat("X##9", &m_position.z, 0.1f, 0.0f, 0.0f, "%.3f");
+        ImGui::DragFloat("Y##8", &m_position.y, 0.1f, 0.0f, 0.0f, "%.3f");
+        ImGui::DragFloat("Z##9", &m_position.z, 0.1f, 0.0f, 0.0f, "%.3f");
 
         ImGui::End();
     }

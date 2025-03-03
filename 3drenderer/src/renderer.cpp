@@ -14,7 +14,6 @@ extern int window_width = 800;
 extern int window_height = 600;
 
 bool show_grid = false;
-bool cull_faces = true;
 cull_method_t cull_method = CULL_BACKFACE;
 render_method_t render_method = RENDER_WIRE;
 vec3_t camera = {0, 0, 0};

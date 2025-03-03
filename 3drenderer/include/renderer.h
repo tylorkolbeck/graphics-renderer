@@ -39,7 +39,6 @@ extern int window_width;
 extern int window_height;
 extern vec3_t camera;
 extern bool show_grid;
-extern bool cull_faces;
 
 bool initialize_renderer(Window *window);
 void destroy_renderer(void);
