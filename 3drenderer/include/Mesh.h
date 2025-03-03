@@ -12,7 +12,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "display.h"
+#include "renderer.h"
 
 // void load_cube_mesh(mesh_t &meshObj);
 // void load_point_mesh(mesh_t &meshObj);
@@ -40,11 +40,11 @@ public:
     vec3_t& scale();
     vec3_t& translation();
     vec3_t& position();
-    int faceCount();
+    size_t faceCount();
     const std::vector<vec3_t>& vertices();
     const std::vector<face_t>& faces();
     
-    void update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, Window window);
+    void update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, Window_t window);
     void render(uint32_t* color_buffer);
 
 };

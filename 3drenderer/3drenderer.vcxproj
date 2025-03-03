@@ -160,7 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
-    <ClInclude Include="display.h" />
+    <ClInclude Include="renderer.h" />
     <ClInclude Include="mesh_old.h" />
     <ClInclude Include="triangles.h" />
     <ClInclude Include="vector.h" />

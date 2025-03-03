@@ -35,7 +35,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="display.h">
+    <ClInclude Include="renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vector.h">

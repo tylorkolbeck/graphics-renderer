@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include "vector.h"
 #include "triangles.h"
+#include "Window.h"
 
 #define FPS 30
 #define FRAME_TARGET_TIME (1000 / FPS)
@@ -23,14 +24,14 @@ typedef enum render_method {
     RENDER_FILL_TRIANGLE_WIRE
 } render_method_t;
 
-struct Window {
+struct Window_t {
     int width;
     int height;
 };
 
 extern cull_method_t cull_method;
 extern render_method_t render_method;
-extern SDL_Window* window;
+extern SDL_Window* m_window;
 extern SDL_Renderer* renderer;
 extern uint32_t* color_buffer;
 extern SDL_Texture* color_buffer_texture;
@@ -40,8 +41,8 @@ extern vec3_t camera;
 extern bool show_grid;
 extern bool cull_faces;
 
-bool initialize_window(void);
-void destroy_window(void);
+bool initialize_renderer(Window *window);
+void destroy_renderer(void);
 void draw_grid(uint32_t* buffer_p, int cellSize, uint32_t color);
 void draw_dot(uint32_t* buffer_p, int cellSize, uint32_t color);
 void draw_pixel(uint32_t* buffer_p, int x, int y, uint32_t color);

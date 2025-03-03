@@ -35,7 +35,7 @@ void Mesh::translate(vec3_t translation)
 }
 
 // TODO: Refactor this method
-void Mesh::update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, Window window)
+void Mesh::update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, Window_t window)
 {
 	m_render_queue.clear();
 	// 1️. Apply transformations to the model matrix
@@ -49,7 +49,7 @@ void Mesh::update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, W
 	// Preallocate the memory required for the faces
 	m_render_queue.reserve(faceCount());
 
-	for (int i = 0; i < faceCount(); i++)
+	for (size_t i = 0; i < faceCount(); i++)
 	{
 		const face_t &mesh_face = faces()[i];
 		vec3_t face_vertices[3];
@@ -131,7 +131,7 @@ void Mesh::update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, W
 
 void Mesh::render(uint32_t *color_buffer)
 {
-	for (int i = 0; i < m_render_queue.size(); i++)
+	for (size_t i = 0; i < m_render_queue.size(); i++)
 	{
 		triangle_t triangles = m_render_queue[i];
 
@@ -184,7 +184,7 @@ vec3_t& Mesh::position()
 	return m_position;
 }
 
-int Mesh::faceCount()
+size_t Mesh::faceCount()
 {
 	return m_faces.size();
 }

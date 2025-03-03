@@ -1,6 +1,6 @@
 #include "triangles.h"
 #include "vector.h"
-#include "display.h"
+#include "renderer.h"
 #include <cstdint>
 
 void int_swap(int *a, int *b)

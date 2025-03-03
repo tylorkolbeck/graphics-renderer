@@ -1,14 +1,15 @@
 #include <cmath>
-#include "display.h"
+#include "renderer.h"
 #include "triangles.h"
 #include "color.h"
 #include <imgui_impl_sdlrenderer2.h>
 #include <imgui_impl_sdl2.h>
+#include "Window.h"
 
-extern SDL_Window *window = NULL;
-extern SDL_Renderer *renderer = NULL;
-extern uint32_t *color_buffer = NULL;
-extern SDL_Texture *color_buffer_texture = NULL;
+extern SDL_Window *m_window;
+extern SDL_Renderer *renderer = nullptr;
+extern uint32_t *color_buffer = nullptr;
+extern SDL_Texture *color_buffer_texture = nullptr;
 extern int window_width = 800;
 extern int window_height = 600;
 
@@ -18,39 +19,13 @@ cull_method_t cull_method = CULL_BACKFACE;
 render_method_t render_method = RENDER_WIRE;
 vec3_t camera = {0, 0, 0};
 
-bool initialize_window(void)
+bool initialize_renderer(Window *window)
 {
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
-	{
-		fprintf(stderr, "Error initializing SDL. \n");
-		return false;
-	}
+	window = window;
+	window_width = window->getWidth();
+	window_height = window->getHeight();
 
-	Uint32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_BORDERLESS;
-
-	// Query SDL to get fullscreen max width and height
-	SDL_DisplayMode display_mode;
-	SDL_GetCurrentDisplayMode(0, &display_mode);
-	window_width = display_mode.w;
-	window_height = display_mode.h;
-
-	// Create SDL window
-	window = SDL_CreateWindow("SDL + ImGui",
-							  SDL_WINDOWPOS_CENTERED,
-							  SDL_WINDOWPOS_CENTERED,
-							  window_width,
-							  window_height,
-							  window_flags);
-	SDL_SetWindowSize(window, window_width, window_height);
-	SDL_SetWindowPosition(window, 0, 0);
-
-	if (!window)
-	{
-		fprintf(stderr, "Error creating SDL window. \n");
-		return false;
-	}
-
-	renderer = SDL_CreateRenderer(window, -1, 0);
+	renderer = SDL_CreateRenderer(window->getSDLWindow(), -1, 0);
 	if (!renderer)
 	{
 		fprintf(stderr, "Error creating renderer. \n");
@@ -62,7 +37,7 @@ bool initialize_window(void)
 	return true;
 }
 
-void destroy_window(void)
+void destroy_renderer(void)
 {
 	// Cleanup ImGui
 	ImGui_ImplSDLRenderer2_Shutdown();
@@ -71,8 +46,8 @@ void destroy_window(void)
 
 	free(color_buffer);
 	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+	// SDL_DestroyWindow(window);
+	// SDL_Quit();
 
 	// ImGui_ImplSDLRenderer2_Shutdown();
 	// ImGui_ImplSDL2_Shutdown();

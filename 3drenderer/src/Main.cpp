@@ -4,9 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <iostream>
-#include "display.h"
+#include "renderer.h"
 #include "vector.h"
-#include "mesh_loader.h"
 #include "color.h"
 #include "matrix.h"
 #include <filesystem>
@@ -16,6 +15,7 @@
 #include "w_HelloWindow.h"
 #include "w_FPSCounter.h"
 #include "w_Transform.h"
+#include "Window.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_sdl2.h"
@@ -32,6 +32,8 @@ w_HelloWindow *w_helloWindow;
 w_FPSCounter *w_fpsCounter;
 w_Transform *w_transform;
 
+Window *window = nullptr;
+
 std::vector<triangle_t> triangles_to_render = {};
 std::string file_path = "assets/f22.obj";
 
@@ -41,12 +43,12 @@ Mesh f22Mesh{};
 
 void setup(void)
 {
-	imguiManager = new ImGuiManager(window, renderer);
-	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
-	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
-	SDL_SetRelativeMouseMode(SDL_FALSE);					 // Disable SDL from hijacking mouse input
-	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0"); // Prevent minimizing when clicking outside
-	SDL_SetWindowGrab(window, SDL_FALSE);					 // Ensure SDL does not "trap" mouse inside window
+	window = new Window("3D Engine", 1080, 720, true);
+	is_running = window->init();
+	is_running = initialize_renderer(window);
+
+	imguiManager = new ImGuiManager(window->getSDLWindow(), renderer);
+
 
 	render_method = RENDER_FILL_TRIANGLE;
 	cull_method = CULL_BACKFACE;
@@ -67,7 +69,7 @@ void setup(void)
 		window_height);
 
 	float fov = M_PI / 3; // 60deg
-	float aspect = (float)window_height / (float)window_width;
+	float aspect = (float)window->getHeight() / (float)window->getWidth();
 	float znear = 0.1;
 	float zfar = 100.0;
 	proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
@@ -129,15 +131,14 @@ void process_input(void)
 
 void update()
 {
-	int time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
-
+	// int time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
 	// if (time_to_wait > 0 && time_to_wait <= FRAME_TARGET_TIME)
 	// 	SDL_Delay(time_to_wait);
 	previous_frame_time = SDL_GetTicks();
 
 	// Update the mesh
 	// f22Mesh.translate({.x = 0.0, .y = 0.0f, .z = 10.0f});
-	f22Mesh.update(camera, proj_matrix, light, true, {width : window_width, height : window_height});
+	f22Mesh.update(camera, proj_matrix, light, true, {width : window->getWidth(), height : window->getHeight()});
 }
 
 void render(void)
@@ -164,8 +165,6 @@ void render(void)
 
 int main(int argc, char *args[])
 {
-	is_running = initialize_window();
-
 	setup();
 
 	while (is_running)
@@ -176,7 +175,7 @@ int main(int argc, char *args[])
 	}
 
 	delete imguiManager;
-	destroy_window();
+	destroy_renderer();
 
 	return 0;
 }
