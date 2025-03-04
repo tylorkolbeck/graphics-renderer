@@ -22,16 +22,16 @@
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"
 
-bool is_running = false;
-int previous_frame_time = 0;
-mat4_t proj_matrix;
+// bool is_running = true;
+// int previous_frame_time = 0;
+// mat4_t proj_matrix;
 
 // ImGui
-ImGuiManager *imguiManager;
+// ImGuiManager *imguiManager;
 // ImGui Widgets
-w_HelloWindow *w_helloWindow;
-w_FPSCounter *w_fpsCounter;
-w_Transform *w_transform;
+// w_HelloWindow *w_helloWindow;
+// w_FPSCounter *w_fpsCounter;
+// w_Transform *w_transform;
 
 // Window *window = nullptr;
 
@@ -169,16 +169,18 @@ int main(int argc, char *args[])
 {
 	gameEngine = new GameEngine("3D Engine", 1080, 720, true);
 	gameEngine->Init();
+
+	gameEngine->startGameLoop();
 	// setup();
 
-	while (is_running)
-	{
-		// process_input();
-		gameEngine->Update();
-		gameEngine->Render();
-	}
+	// while (is_running)
+	// {
+	// 	// process_input();
+	// 	gameEngine->Update();
+	// 	gameEngine->Render();
+	// }
 
-	delete imguiManager;
+	// delete imguiManager;
 	// destroy_renderer();
 
 	return 0;

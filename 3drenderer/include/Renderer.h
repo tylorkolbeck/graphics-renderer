@@ -29,6 +29,7 @@ public:
     SDL_Renderer *getSDLRenderer() { return m_SDL_renderer; }
     void drawFilledTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
     uint32_t* getColorBuffer();
+    void writeColorBufferToBinaryFile(const std::string &filename);
 
 private:
     int loc_1d(int x, int y);

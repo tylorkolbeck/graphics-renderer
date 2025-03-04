@@ -10,6 +10,7 @@
 #include "matrix.h"
 #include "Mesh.h"
 #include "Renderer.h"
+#include "ImGuiWidget.h"
 
 typedef enum cull_method {
     CULL_NONE,
@@ -31,6 +32,7 @@ public:
     void Setup();
     void Update();
     void Render();
+    void startGameLoop();
     int Init();
 
     const int* getWidth() { return &m_width; }
@@ -55,6 +57,11 @@ private:
     ImGuiManager *m_ImGuiManager;
     mat4_t m_proj_matrix;
     std::string m_model_file_path;
-    Mesh m_mesh{};
+    Mesh *m_mesh;
     int m_previous_frame_time;
+
+    ImGuiWidget *w_helloWindow;
+    ImGuiWidget *w_transform;
+
+    void processInput();
 };

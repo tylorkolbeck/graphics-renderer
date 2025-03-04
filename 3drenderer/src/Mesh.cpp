@@ -169,6 +169,8 @@ void Mesh::render(Renderer *renderer)
 		// 	draw_rect(color_buffer, triangles.points[2].x - 3, triangles.points[2].y - 3, 6, 6);
 		// }
 	}
+	// const std::string logFile = "log/buffer.txt";
+	// renderer->writeColorBufferToBinaryFile(logFile);
 }
 
 vec3_t &Mesh::rotation()

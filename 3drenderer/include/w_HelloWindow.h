@@ -12,7 +12,7 @@ public:
     void render() override
     {
         ImGui::Begin("Hello ImGui");
-        ImGui::Text("Tgus us a test window inside SDL2!");
+        ImGui::Text("This is a test window inside SDL2!");
         ImGui::End();
     }
 };

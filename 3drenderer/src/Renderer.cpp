@@ -38,17 +38,17 @@ bool Renderer::init()
 
     createColorBuffer32(m_window->getWidth() * m_window->getHeight());
 
+    m_color_buffer_texture = SDL_CreateTexture(
+        m_SDL_renderer,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        m_window->getWidth(),
+        m_window->getHeight());
+
     if (!m_color_buffer_texture)
     {
         std::cerr << "Error: Failed to create SDL Texture. SDL Error: " << SDL_GetError() << std::endl;
     }
-
-    m_color_buffer_texture = SDL_CreateTexture(
-		m_SDL_renderer,
-		SDL_PIXELFORMAT_ARGB8888,
-		SDL_TEXTUREACCESS_STREAMING,
-		m_window->getWidth(),
-		m_window->getHeight());
 
     // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 
@@ -114,6 +114,7 @@ void Renderer::drawPixel(int x, int y, uint32_t color)
     if (x >= 0 && x < m_window->getWidth() && y >= 0 && y < m_window->getHeight())
     {
         m_color_buffer[loc_1d(x, y)] = color;
+        // std::cout << "Drawing pixel at (" << x << ", " << y << ") with color: " << std::hex << 0xFFFF0000 << std::dec << std::endl;
     }
 }
 
@@ -123,9 +124,16 @@ void Renderer::createColorBuffer32(int size)
     if (!m_color_buffer)
     {
         std::cerr << "Error allocating memory for color buffer" << std::endl;
+        return;
     }
 
-    std::cout << "Debug: m_color_buffer address: " << (void*)m_color_buffer << std::endl;
+
+    memset(m_color_buffer, 0, sizeof(uint32_t) * size);
+    std::cout << "Buffer initialized with " << size << " pixels.\n";
+    for (int i = 0; i < 10; i++)
+    {
+        std::cout << "Pixel " << i << ": " << std::hex << m_color_buffer[i] << std::dec << std::endl;
+    }
 
 }
 
@@ -158,8 +166,9 @@ void Renderer::renderColorBuffer()
         std::cerr << "Error: Color buffer texture is NULL" << std::endl;
     }
 
-    int tex_width, tex_height;
-    SDL_QueryTexture(m_color_buffer_texture, NULL, NULL, &tex_width, &tex_height);
+    // Leave for debugging
+    // int tex_width, tex_height;
+    // SDL_QueryTexture(m_color_buffer_texture, NULL, NULL, &tex_width, &tex_height);
 
     int sdlError = SDL_UpdateTexture(
         m_color_buffer_texture,
@@ -167,15 +176,17 @@ void Renderer::renderColorBuffer()
         m_color_buffer,
         (int)m_window->getWidth() * sizeof(uint32_t));
 
-    SDL_RenderCopy(m_SDL_renderer, m_color_buffer_texture, NULL, NULL);
+    if (SDL_RenderCopy(m_SDL_renderer, m_color_buffer_texture, NULL, NULL))
+    {
+        std::cerr << SDL_GetError() << std::endl;
+    }
 
     if (sdlError)
     {
         std::cerr << SDL_GetError() << std::endl;
     }
 
-
-    clearColorBuffer(0xFF000000);
+    // clearColorBuffer(0xFF000000);
 }
 
 void Renderer::drawLine(int x1, int y1, int x2, int y2, uint32_t color)
@@ -259,23 +270,23 @@ bool Renderer::isCulled(camera camera, vec4_t vertices[])
 bool Renderer::isCulled(camera camera, vec3_t vector_a, vec3_t vector_b, vec3_t vector_c)
 {
     // 1. Find vectors B-A and C-A
-	vec3_t vector_ab = vec3_sub(vector_b, vector_a);
-	vec3_t vector_ac = vec3_sub(vector_c, vector_a);
-	vec3_normalize(&vector_ab);
-	vec3_normalize(&vector_ac);
+    vec3_t vector_ab = vec3_sub(vector_b, vector_a);
+    vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+    vec3_normalize(&vector_ab);
+    vec3_normalize(&vector_ac);
 
-	// 2. Compute face normal using cross product of ab and ac - Order matters based on winding direction
-	vec3_t normal = vec3_cross(vector_ab, vector_ac);
-	vec3_normalize(&normal);
+    // 2. Compute face normal using cross product of ab and ac - Order matters based on winding direction
+    vec3_t normal = vec3_cross(vector_ab, vector_ac);
+    vec3_normalize(&normal);
 
-	// 3. Find the camera ray vector by subtracting the camera position from point A
-	vec3_t camera_ray = vec3_sub({camera.location.x, camera.location.y, camera.location.z}, vector_a);
-	vec3_normalize(&camera_ray);
-	// 4. Take the dot product between the normal N and the camera ray
-	float dot_prod = vec3_dot(normal, camera_ray);
-	// 5. If this dot product is less than zero, then do not display the face
+    // 3. Find the camera ray vector by subtracting the camera position from point A
+    vec3_t camera_ray = vec3_sub({camera.location.x, camera.location.y, camera.location.z}, vector_a);
+    vec3_normalize(&camera_ray);
+    // 4. Take the dot product between the normal N and the camera ray
+    float dot_prod = vec3_dot(normal, camera_ray);
+    // 5. If this dot product is less than zero, then do not display the face
 
-	return dot_prod < 0;
+    return dot_prod < 0;
 }
 
 int Renderer::loc_1d(int x, int y)
@@ -377,3 +388,20 @@ uint32_t *Renderer::getColorBuffer()
 {
     return m_color_buffer;
 }
+#include <fstream>
+
+void Renderer::writeColorBufferToBinaryFile(const std::string &filename)
+{
+    std::ofstream file(filename, std::ios::binary);
+    if (!file)
+    {
+        std::cerr << "Error: Unable to open file for writing color buffer" << std::endl;
+        return;
+    }
+
+    file.write(reinterpret_cast<const char *>(m_color_buffer), m_window->getWidth() * m_window->getHeight() * sizeof(uint32_t));
+    file.close();
+
+    std::cout << "Color buffer saved as binary to " << filename << std::endl;
+}
+

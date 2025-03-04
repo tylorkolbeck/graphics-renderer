@@ -1,4 +1,5 @@
 #include "light.h"
+#include <iostream>
 
 light_t light = {
     .direction = { 0, 0, 1}
