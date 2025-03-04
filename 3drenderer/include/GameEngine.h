@@ -9,6 +9,19 @@
 #include "ImGuiManager.h"
 #include "matrix.h"
 #include "Mesh.h"
+#include "Renderer.h"
+
+typedef enum cull_method {
+    CULL_NONE,
+    CULL_BACKFACE
+} cull_method_t;
+
+typedef enum render_method {
+    RENDER_WIRE,
+    RENDER_WIRE_VERTEX,
+    RENDER_FILL_TRIANGLE,
+    RENDER_FILL_TRIANGLE_WIRE
+} render_method_t;
 
 class GameEngine
 {
@@ -22,7 +35,7 @@ public:
 
     const int* getWidth() { return &m_width; }
     const int* getHeight() { return &m_height; }
-    const bool isFullScreen() { return &m_full_screen; }
+    const bool* isFullScreen() { return &m_full_screen; }
 
 private:
     Window *m_window;
@@ -31,10 +44,10 @@ private:
     int m_height;
 
     bool m_full_screen;
-    SDL_Renderer *m_renderer;
+    Renderer *m_renderer;
     bool m_is_running;
-    uint32_t *m_color_buffer;
-    SDL_Texture *m_color_buffer_texture;
+    // uint32_t *m_color_buffer;
+    // SDL_Texture *m_color_buffer_texture;
     vec3_t m_camera;
     cull_method_t m_cull_method = CULL_BACKFACE;
     render_method_t m_render_method = RENDER_WIRE;

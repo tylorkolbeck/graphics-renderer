@@ -1,5 +1,7 @@
 #include "Mesh.h"
 #include "light.h"
+#include "Window.h"
+#include "Renderer.h"
 
 Mesh::Mesh()
 	: m_rotation{0, 0, 0},
@@ -35,7 +37,7 @@ void Mesh::translate(vec3_t translation)
 }
 
 // TODO: Refactor this method
-void Mesh::update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, Window_t window)
+void Mesh::update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, Window *window)
 {
 	m_render_queue.clear();
 	// 1️. Apply transformations to the model matrix
@@ -102,8 +104,8 @@ void Mesh::update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, W
 				// Apply projection
 				projected_points[j] = mat4_mul_vec4_project(proj_matrix, transformed_vertices[j]);
 
-				projected_points[j].x = (1 - projected_points[j].x) * (window.width / 2.0);
-				projected_points[j].y = (projected_points[j].y + 1) * (window.height / 2.0);
+				projected_points[j].x = (1 - projected_points[j].x) * (window->getWidth() / 2.0);
+				projected_points[j].y = (projected_points[j].y + 1) * (window->getHeight() / 2.0);
 			}
 
 			float avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3;
@@ -129,38 +131,43 @@ void Mesh::update(vec3_t camera, mat4_t proj_matrix, light_t light, bool cull, W
 	std::sort(m_render_queue.begin(), m_render_queue.end(), compareAvg);
 }
 
-void Mesh::render(uint32_t *color_buffer)
+void Mesh::render(Renderer *renderer)
 {
 	for (size_t i = 0; i < m_render_queue.size(); i++)
 	{
 		triangle_t triangles = m_render_queue[i];
+		renderer->drawFilledTriangle(
+			triangles.points[0].x, triangles.points[0].y, // vertex A
+			triangles.points[1].x, triangles.points[1].y, // vertex B
+			triangles.points[2].x, triangles.points[2].y, // vertex C
+			triangles.color);
 
 		// Draw filled triangles
-		if (render_method == RENDER_FILL_TRIANGLE || render_method == RENDER_FILL_TRIANGLE_WIRE)
-		{
-			draw_filled_triangle(
-				color_buffer,
-				triangles.points[0].x, triangles.points[0].y, // vertex A
-				triangles.points[1].x, triangles.points[1].y, // vertex B
-				triangles.points[2].x, triangles.points[2].y, // vertex C
-				triangles.color);
-		}
+		// if (render_method == RENDER_FILL_TRIANGLE || render_method == RENDER_FILL_TRIANGLE_WIRE)
+		// {
+		// 	draw_filled_triangle(
+		// 		color_buffer,
+		// 		triangles.points[0].x, triangles.points[0].y, // vertex A
+		// 		triangles.points[1].x, triangles.points[1].y, // vertex B
+		// 		triangles.points[2].x, triangles.points[2].y, // vertex C
+		// 		triangles.color);
+		// }
 
-		// Draw triangle wireframe
-		if (render_method == RENDER_WIRE || render_method == RENDER_WIRE_VERTEX || render_method == RENDER_FILL_TRIANGLE_WIRE)
-		{
-			draw_triangle(
-				color_buffer,
-				triangles,
-				Color::C_WHITE);
-		}
+		// // Draw triangle wireframe
+		// if (render_method == RENDER_WIRE || render_method == RENDER_WIRE_VERTEX || render_method == RENDER_FILL_TRIANGLE_WIRE)
+		// {
+		// 	draw_triangle(
+		// 		color_buffer,
+		// 		triangles,
+		// 		Color::C_WHITE);
+		// }
 
-		if (render_method == RENDER_WIRE_VERTEX)
-		{
-			draw_rect(color_buffer, triangles.points[0].x - 3, triangles.points[0].y - 3, 6, 6);
-			draw_rect(color_buffer, triangles.points[1].x - 3, triangles.points[1].y - 3, 6, 6);
-			draw_rect(color_buffer, triangles.points[2].x - 3, triangles.points[2].y - 3, 6, 6);
-		}
+		// if (render_method == RENDER_WIRE_VERTEX)
+		// {
+		// 	draw_rect(color_buffer, triangles.points[0].x - 3, triangles.points[0].y - 3, 6, 6);
+		// 	draw_rect(color_buffer, triangles.points[1].x - 3, triangles.points[1].y - 3, 6, 6);
+		// 	draw_rect(color_buffer, triangles.points[2].x - 3, triangles.points[2].y - 3, 6, 6);
+		// }
 	}
 }
 
@@ -197,6 +204,11 @@ const std::vector<vec3_t> &Mesh::vertices()
 const std::vector<face_t> &Mesh::faces()
 {
 	return m_faces;
+}
+
+bool Mesh::compareAvg(const triangle_t &a, const triangle_t &b)
+{
+	return a.avg_depth > b.avg_depth;
 }
 
 void Mesh::parse_obj_file(const std::string &path)
@@ -250,3 +262,4 @@ void Mesh::parseFace(const std::string &line)
 		std::cerr << "Error parsing face: " << line << std::endl;
 	}
 }
+

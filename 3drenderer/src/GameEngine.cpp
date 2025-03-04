@@ -20,20 +20,21 @@ void GameEngine::Setup()
     m_model_file_path = "assets/f22.obj";
     m_window = new Window(m_title, m_width, m_height, m_full_screen);
     m_is_running = m_window->init();
-    m_is_running = initialize_renderer(m_window);
+    m_renderer = new Renderer(m_window);
+    m_is_running = m_renderer->init();
 
-    m_ImGuiManager = new ImGuiManager(m_window->getSDLWindow(), renderer);
+    m_ImGuiManager = new ImGuiManager(m_window->getSDLWindow(), m_renderer->getSDLRenderer());
 
     m_render_method = RENDER_FILL_TRIANGLE;
     m_cull_method = CULL_BACKFACE;
 
     // Creating SDL texture used to display color buffer
-    m_color_buffer_texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_ARGB8888,
-        SDL_TEXTUREACCESS_STREAMING,
-        window_width,
-        window_height);
+    // m_color_buffer_texture = SDL_CreateTexture(
+    //     m_renderer->getSDLRenderer(),
+    //     SDL_PIXELFORMAT_ARGB8888,
+    //     SDL_TEXTUREACCESS_STREAMING,
+    //     m_window->getWidth(),
+    //     m_window->getHeight());
 
     float fov = M_PI / 3; // 60deg
     float aspect = (float)m_window->getHeight() / (float)m_window->getWidth();
@@ -75,13 +76,13 @@ void GameEngine::Render()
     //     draw_grid(color_buffer, 10, Color::C_LIGHTGREY);
 
     // Draw the model
-    m_mesh.render(m_color_buffer);
+    m_mesh.render(m_renderer);
 
-    render_color_buffer();          // Render the color buffer to the texture
-    clear_color_buffer(0xFF000000); // Set each pixel to yellow color in buffer
+    m_renderer->renderColorBuffer();          // Render the color buffer to the texture
+    // clear_color_buffer(m_color_buffer, 0xFF000000); // Set each pixel to yellow color in buffer
 
     m_ImGuiManager->endFrame();
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(m_renderer->getSDLRenderer());
 }
 
 int GameEngine::Init()
@@ -96,7 +97,7 @@ int GameEngine::Init()
     }
 
     delete m_ImGuiManager;
-    destroy_renderer();
+    delete m_renderer;
 
     return 0;
 }
