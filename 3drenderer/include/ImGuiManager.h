@@ -18,6 +18,7 @@ public:
     void endFrame();
 
     void addWidget(ImGuiWidget* widget);
+    void renderDockingSpace();
 
 private:
     SDL_Window *m_window;

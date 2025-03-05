@@ -60,19 +60,22 @@ void GameEngine::Update()
     m_previous_frame_time = SDL_GetTicks();
     m_mesh->update(m_camera, m_proj_matrix, light, true, m_window);
 }
-
 void GameEngine::Render()
 {
+    SDL_SetRenderDrawColor(m_renderer->getSDLRenderer(), 0, 0, 0, 255); // Black background
+    SDL_RenderClear(m_renderer->getSDLRenderer());
     m_ImGuiManager->beginFrame();
+
+   
     if (*m_show_grid)
         m_renderer->drawGrid(100, Color::DARK_GRAY);
 
     m_mesh->render(m_renderer);
-
-    m_renderer->renderColorBuffer(); // Render the color buffer to the texture
+    m_renderer->renderColorBuffer();
     m_renderer->clearColorBuffer(0xFF000000);
 
     m_ImGuiManager->endFrame();
+
     SDL_RenderPresent(m_renderer->getSDLRenderer());
 }
 
