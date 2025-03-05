@@ -7,6 +7,8 @@
 #include "ImGuiManager.h"
 #include "w_FPSCounter.h"
 #include "w_Transform.h"
+#include "w_HelloWindow.h"
+#include "imgui_impl_sdlrenderer2.h"
 
 GameEngine::GameEngine(const std::string &title, int width, int height, bool full_screen)
     : m_title(title), m_width(width), m_height(height), m_full_screen(full_screen)
@@ -24,6 +26,7 @@ void GameEngine::Setup()
     m_is_running = m_window->init();
     m_renderer = new Renderer(m_window);
     m_is_running = m_renderer->init();
+    m_show_grid = new bool(false);
 
     m_ImGuiManager = new ImGuiManager(m_window->getSDLWindow(), m_renderer->getSDLRenderer());
 
@@ -42,9 +45,10 @@ void GameEngine::Setup()
     // Register Widgets
     w_fpsCounter = new w_FPSCounter();
     w_transform = new w_Transform("Transform", m_mesh->rotation(), m_mesh->scale(), m_mesh->translation());
-
+    w_helloWindow = new w_HelloWindow(m_show_grid);
     m_ImGuiManager->addWidget(w_fpsCounter);
     m_ImGuiManager->addWidget(w_transform);
+    m_ImGuiManager->addWidget(w_helloWindow);
 }
 
 void GameEngine::Update()
@@ -60,15 +64,13 @@ void GameEngine::Update()
 void GameEngine::Render()
 {
     m_ImGuiManager->beginFrame();
-    m_mesh->render(m_renderer);
+    if (*m_show_grid)
+        m_renderer->drawGrid(100, Color::DARK_GRAY);
 
-    // if (show_grid)
-    //     draw_grid(color_buffer, 10, Color::C_LIGHTGREY);
+    m_mesh->render(m_renderer);
 
     m_renderer->renderColorBuffer(); // Render the color buffer to the texture
     m_renderer->clearColorBuffer(0xFF000000);
-
-    
 
     m_ImGuiManager->endFrame();
     SDL_RenderPresent(m_renderer->getSDLRenderer());
@@ -77,55 +79,55 @@ void GameEngine::Render()
 void GameEngine::startGameLoop()
 {
     while (m_is_running)
-    {   processInput();
+    {
+        processInput();
         Update();
         Render();
     }
 }
 
-
 void GameEngine::processInput()
 {
-	SDL_Event event;
+    SDL_Event event;
 
-	while (SDL_PollEvent(&event))
-	{
-		m_ImGuiManager->processEvent(event);
-		// Check if ImGui wants to capture the event (prevents SDL from handling ImGui clicks)
-		ImGuiIO &io = ImGui::GetIO();
+    while (SDL_PollEvent(&event))
+    {
+        m_ImGuiManager->processEvent(event);
+        // Check if ImGui wants to capture the event (prevents SDL from handling ImGui clicks)
+        ImGuiIO &io = ImGui::GetIO();
 
-		if (io.WantCaptureMouse || io.WantCaptureKeyboard)
-			continue;
+        if (io.WantCaptureMouse || io.WantCaptureKeyboard)
+            continue;
 
-		switch (event.type)
-		{
-		case SDL_QUIT:
-			m_is_running = false;
-			break;
-		case SDL_KEYDOWN:
-			if (event.key.keysym.sym == SDLK_ESCAPE)
+        switch (event.type)
+        {
+        case SDL_QUIT:
             m_is_running = false;
-			// if (event.key.keysym.sym == SDLK_1)
-			// 	render_method = RENDER_WIRE_VERTEX;
-			// if (event.key.keysym.sym == SDLK_2)
-			// 	render_method = RENDER_WIRE;
-			// if (event.key.keysym.sym == SDLK_3)
-			// 	render_method = RENDER_FILL_TRIANGLE;
-			// if (event.key.keysym.sym == SDLK_4)
-			// 	render_method = RENDER_FILL_TRIANGLE_WIRE;
-			// if (event.key.keysym.sym == SDLK_c)
-			// 	cull_method = CULL_BACKFACE;
-			// if (event.key.keysym.sym == SDLK_d)
-			// 	cull_method = CULL_NONE;
-			// if (event.key.keysym.sym == SDLK_w)
-			// 	camera.z += 0.1;
-			// if (event.key.keysym.sym == SDLK_s)
-			// 	camera.z -= 0.1;
-			// if (event.key.keysym.sym == SDLK_g)
-			// 	show_grid = !show_grid;
-			break;
-		}
-	}
+            break;
+        case SDL_KEYDOWN:
+            if (event.key.keysym.sym == SDLK_ESCAPE)
+                m_is_running = false;
+            // if (event.key.keysym.sym == SDLK_1)
+            // 	render_method = RENDER_WIRE_VERTEX;
+            // if (event.key.keysym.sym == SDLK_2)
+            // 	render_method = RENDER_WIRE;
+            // if (event.key.keysym.sym == SDLK_3)
+            // 	render_method = RENDER_FILL_TRIANGLE;
+            // if (event.key.keysym.sym == SDLK_4)
+            // 	render_method = RENDER_FILL_TRIANGLE_WIRE;
+            // if (event.key.keysym.sym == SDLK_c)
+            // 	cull_method = CULL_BACKFACE;
+            // if (event.key.keysym.sym == SDLK_d)
+            // 	cull_method = CULL_NONE;
+            // if (event.key.keysym.sym == SDLK_w)
+            // 	camera.z += 0.1;
+            // if (event.key.keysym.sym == SDLK_s)
+            // 	camera.z -= 0.1;
+            // if (event.key.keysym.sym == SDLK_g)
+            // 	show_grid = !show_grid;
+            break;
+        }
+    }
 }
 
 int GameEngine::Init()

@@ -53,7 +53,7 @@ private:
     vec3_t m_camera;
     cull_method_t m_cull_method = CULL_BACKFACE;
     render_method_t m_render_method = RENDER_WIRE;
-    vec3_t m_show_grid;
+    bool* m_show_grid;
     ImGuiManager *m_ImGuiManager;
     mat4_t m_proj_matrix;
     std::string m_model_file_path;
@@ -62,6 +62,7 @@ private:
 
     ImGuiWidget *w_fpsCounter;
     ImGuiWidget *w_transform;
+    ImGuiWidget *w_helloWindow;
 
     void processInput();
 };

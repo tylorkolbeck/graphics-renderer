@@ -30,6 +30,7 @@ public:
     void drawFilledTriangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
     uint32_t* getColorBuffer();
     void writeColorBufferToBinaryFile(const std::string &filename);
+    SDL_Texture* getSDLTexture() { return m_color_buffer_texture; }
 
 private:
     int loc_1d(int x, int y);

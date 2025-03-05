@@ -9,7 +9,7 @@ ImGuiManager::ImGuiManager(SDL_Window *window, SDL_Renderer *renderer)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable; // Enable keyboard controls
 
     // Set up ImGui with SDL2 and SDL_Renderer
     ImGui_ImplSDL2_InitForSDLRenderer(m_window, m_renderer);
