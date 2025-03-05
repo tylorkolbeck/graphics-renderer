@@ -60,7 +60,7 @@ private:
     Mesh *m_mesh;
     int m_previous_frame_time;
 
-    ImGuiWidget *w_helloWindow;
+    ImGuiWidget *w_fpsCounter;
     ImGuiWidget *w_transform;
 
     void processInput();
